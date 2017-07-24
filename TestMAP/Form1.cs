@@ -94,5 +94,31 @@ namespace TestMAP
             gMapControl1.MaximumSize = new Size((Form1.ActiveForm.Size.Width / 100 * 70), Form1.ActiveForm.Size.Height);
    
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            GroupBox groupBoxTST = new GroupBox();
+            MetroFramework.Controls.MetroButton But1 = new MetroFramework.Controls.MetroButton();
+            RadioButton RBut1 = new RadioButton();
+            RBut1.Text = "Some text";
+            groupBoxTST.Size = new Size(flowLayoutPanel1.Size.Width, flowLayoutPanel1.Size.Height/5);
+            But1.Size = new Size(groupBoxTST.Size.Width / 2, groupBoxTST.Size.Height);
+            RBut1.Size = new Size(groupBoxTST.Size.Width / 2, groupBoxTST.Size.Height);
+
+            groupBoxTST.Controls.Add(But1);
+            But1.Location = new Point(groupBoxTST.Location.X, groupBoxTST.Location.Y);
+            groupBoxTST.Controls.Add(RBut1);
+            RBut1.Location = new Point(groupBoxTST.Location.X + groupBoxTST.Size.Width / 2, groupBoxTST.Location.Y);
+
+
+            this.flowLayoutPanel1.Controls.Add(groupBoxTST);
+
+        }
+
+        private void metroButton1_Click(object sender, EventArgs e)
+        {
+            this.flowLayoutPanel1.Controls.RemoveAt(flowLayoutPanel1.Controls.Count-1);
+        }
+
     }
 }
