@@ -111,6 +111,7 @@ namespace TestMAP
             RBut1.Location = new Point(groupBoxTST.Location.X + groupBoxTST.Size.Width / 2, groupBoxTST.Location.Y);
 
 
+
             this.flowLayoutPanel1.Controls.Add(groupBoxTST);
 
         }
