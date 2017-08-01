@@ -179,6 +179,8 @@ namespace TestMAP
             gMapControl1.OnMarkerLeave +=
                 new MarkerLeave(mapControl_OnMarkerLeave);
 
+            
+
 
             routes = new GMap.NET.WindowsForms.GMapRoute(polygonPoints1, "single_line");
             routes.Stroke.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
@@ -498,9 +500,22 @@ namespace TestMAP
 
         private void bunifuCustomDataGrid1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.ColumnIndex == 5)
+            if (bunifuCustomDataGrid1.Columns[e.ColumnIndex] == ColDelMarker)
             {
                 bunifuCustomDataGrid1.Rows.RemoveAt(e.RowIndex);
+
+                routes.Points.RemoveAt(e.RowIndex);
+                markersOverlay.Markers.RemoveAt(e.RowIndex);
+                gMapControl1.UpdateRouteLocalPosition(routes);
+
+                foreach (DataGridViewRow Row in bunifuCustomDataGrid1.Rows)
+                {
+                    if (Convert.ToInt32(Row.Cells["ColNoMarker"].Value) > e.RowIndex)
+                    {
+                        Row.Cells["ColNoMarker"].Value = Convert.ToInt32(Row.Cells["ColNoMarker"].Value) - 1;
+                    }
+                }
+
             }
         }
     }
