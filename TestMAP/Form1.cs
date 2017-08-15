@@ -49,6 +49,7 @@ namespace TestMAP
 
         
         List<PointLatLng> polygonPoints1 = new List<PointLatLng>();
+        Size MetroTabControlSize = new Size(1498, 262);
 
         public Form1()
         {
@@ -542,8 +543,10 @@ namespace TestMAP
         
         private void Form1_Resize(object sender, EventArgs e)
         {
-            gMapControl1.MaximumSize = new Size((Form1.ActiveForm.Size.Width / 100 * 70), Form1.ActiveForm.Size.Height);
-   
+            metroTabControl1.Location = new Point(Form1.ActiveForm.Size.Width - metroTabControl1.Size.Width - 20, Form1.ActiveForm.Size.Height - metroTabControl1.Size.Height - 20);
+            metroTabControl1.Size = new Size(Form1.ActiveForm.Size.Width - 40 < MetroTabControlSize.Width ? Form1.ActiveForm.Size.Width - 40 : MetroTabControlSize.Width, metroTabControl1.Size.Height);
+
+            
         }
 
         private void bunifuCustomDataGrid1_CellClick(object sender, DataGridViewCellEventArgs e)
