@@ -72,8 +72,10 @@
     </Compile>
     <Compile Include="GMapMarkerImage.cs" />
     <Compile Include="Markers.cs" />
+    <Compile Include="OpenSeaMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WMSProvider .cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

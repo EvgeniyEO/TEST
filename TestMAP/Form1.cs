@@ -154,8 +154,8 @@ namespace TestMAP
             gMapControl1.Dock = DockStyle.Fill;
 
             //Указываем что будем использовать карты Google.
-            gMapControl1.MapProvider =
-                GMap.NET.MapProviders.GMapProviders.GoogleMap;
+            gMapControl1.MapProvider = OpenSeaMap.Instance;
+                //GMap.NET.MapProviders.GMapProviders.GoogleMap;
             GMap.NET.GMaps.Instance.Mode =
                 GMap.NET.AccessMode.ServerOnly;
 
