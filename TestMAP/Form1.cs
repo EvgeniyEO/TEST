@@ -94,8 +94,10 @@ namespace TestMAP
             bitmapBlackNCh =
                 Bitmap.FromFile(Application.StartupPath + @"\BlackNoCheck.png") as Bitmap;
 
-           
-            
+            this.bunifuCustomDataGrid1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellValueChanged);
+            this.bunifuCustomDataGrid1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellContentClick);
+            this.bunifuCustomDataGrid1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellClick);
+
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -154,8 +156,8 @@ namespace TestMAP
             gMapControl1.Dock = DockStyle.Fill;
 
             //Указываем что будем использовать карты Google.
-            gMapControl1.MapProvider = OpenSeaMap.Instance;
-                //GMap.NET.MapProviders.GMapProviders.GoogleMap;
+            gMapControl1.MapProvider = 
+                GMap.NET.MapProviders.GMapProviders.GoogleMap;
             GMap.NET.GMaps.Instance.Mode =
                 GMap.NET.AccessMode.ServerOnly;
 
@@ -301,42 +303,7 @@ namespace TestMAP
 
         private void Method1(object sender, EventArgs e)
         {
-            //MenuItem item = sender as MenuItem;
-
-            ////Если надо установить только один маркер,
-            ////то выполняем очистку списка маркеров
-            ////markersOverlay.Markers.Clear();
-            //PointLatLng point = gMapControl1.FromLocalToLatLng(CurrentMenuPoint.X, CurrentMenuPoint.Y);
-
-            ////Инициализируем новую переменную изображения и
-            ////загружаем в нее изображение маркера,
-            ////лежащее возле исполняемого файла
-            //Bitmap bitmap =
-            //    Bitmap.FromFile(Application.StartupPath + @"\marker.png") as Bitmap;
-
-            ////Инициализируем новый маркер с использованием 
-            ////созданного нами маркера.
-            //GMapMarker marker = new GMapMarkerImage(point, bitmapBlackCh);
-
-            //marker.ToolTipMode = MarkerTooltipMode.OnMouseOver;
-
-            ////В качестве подсказки к маркеру устанавливаем 
-            ////координаты где он устанавливается.
-            ////Данные о местоположении маркера, вы можете вывести в любой компонент
-            ////который вам нужен.
-            ////например:
-            ////textBo1.Text = point.Lat;
-            ////textBo2.Text = point.Lng;
-            //marker.ToolTipText = string.Format(StrFormatLatLng, point.Lat, point.Lng);
-            ////Добавляем маркер в список маркеров.
-            //markersOverlay.Markers.Add(marker);
-
-            //routes.Points.Add(point);
-            //gMapControl1.UpdateRouteLocalPosition(routes);
-            //bunifuCustomDataGrid1.Rows.Add(markersOverlay.Markers.IndexOf(marker), true, string.Format(StrFormatLatLng, point.Lat, point.Lng));
-           
             int index = AddMarkerToEnd(CurrentMenuPoint.X, CurrentMenuPoint.Y, true);
-
             bunifuCustomDataGrid1.Rows.Add(index, true, string.Format(StrFormatLatLng, markersOverlay.Markers[index].Position.Lat, markersOverlay.Markers[index].Position.Lng));
         }
         private void Method2(object sender, EventArgs e)
@@ -383,6 +350,16 @@ namespace TestMAP
             rightClickMenuStrip.MenuItems.Add("Удалить точку", new EventHandler(Method2));
             rightClickMenuStrip.MenuItems.Add("Удалить все точки", new EventHandler(Method3));
 
+            GMapControl GMapCtrl;
+            if (sender is GMap.NET.WindowsForms.GMapControl)
+            {
+                GMapCtrl = sender as GMap.NET.WindowsForms.GMapControl;
+            }
+            else
+            {
+                GMapCtrl = this.gMapControl1;
+            }
+
 
             switch (e.Button)
             {
@@ -402,7 +379,7 @@ namespace TestMAP
                     break;
                 case MouseButtons.Right:
                     CurrentMenuPoint = new Point(e.X, e.Y);
-                    rightClickMenuStrip.Show(this, new Point(e.X, e.Y));
+                    rightClickMenuStrip.Show(GMapCtrl, CurrentMenuPoint);
                     break;
                 case MouseButtons.XButton1:
                     break;
@@ -546,7 +523,6 @@ namespace TestMAP
         
         private void Form1_Resize(object sender, EventArgs e)
         {
-
         }
 
         private void bunifuCustomDataGrid1_CellClick(object sender, DataGridViewCellEventArgs e)
