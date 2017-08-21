@@ -568,5 +568,23 @@ namespace TestMAP
                 bunifuCustomDataGrid1.CommitEdit(DataGridViewDataErrorContexts.Commit);
             }
         }
+
+        private void MenuButton_Click(object sender, EventArgs e)
+        {
+            if (MenuGradientPanel.Size.Width == 60)
+            {
+                MenuGradientPanel.Width = 260;
+                MenuGradientPanel.Visible = false;
+                PanelAnimator.ShowSync(MenuGradientPanel);
+            }
+            else
+            {
+                MenuGradientPanel.Width = 60;
+                MenuGradientPanel.Visible = false;
+                PanelAnimator.ShowSync(MenuGradientPanel);
+            }
+        }
+
+
     }
 }
