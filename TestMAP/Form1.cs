@@ -63,7 +63,7 @@ namespace TestMAP
             this.ColInMission = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.ColLatLon = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColDelMarker = new System.Windows.Forms.DataGridViewButtonColumn();
-            this.bunifuCustomDataGrid1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.bunifuGridWayPoint.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ColNoMarker,
             this.ColInMission,
             this.ColLatLon,
@@ -94,9 +94,9 @@ namespace TestMAP
             bitmapBlackNCh =
                 Bitmap.FromFile(Application.StartupPath + @"\BlackNoCheck.png") as Bitmap;
 
-            this.bunifuCustomDataGrid1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellValueChanged);
-            this.bunifuCustomDataGrid1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellContentClick);
-            this.bunifuCustomDataGrid1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellClick);
+            this.bunifuGridWayPoint.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellValueChanged);
+            this.bunifuGridWayPoint.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellContentClick);
+            this.bunifuGridWayPoint.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellClick);
 
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -236,7 +236,7 @@ namespace TestMAP
                         string.Format("{0},{1}", point.Lat, point.Lng);
 
                     // Изменение  Lat/Lng в таблице вместе с переносом маркера
-                    bunifuCustomDataGrid1.Rows[currentMarkerInd].Cells[ColLatLon.Name].Value = string.Format(StrFormatLatLng, point.Lat, point.Lng);
+                    bunifuGridWayPoint.Rows[currentMarkerInd].Cells[ColLatLon.Name].Value = string.Format(StrFormatLatLng, point.Lat, point.Lng);
                 }
             }
         }
@@ -304,7 +304,7 @@ namespace TestMAP
         private void Method1(object sender, EventArgs e)
         {
             int index = AddMarkerToEnd(CurrentMenuPoint.X, CurrentMenuPoint.Y, true);
-            bunifuCustomDataGrid1.Rows.Add(index, true, string.Format(StrFormatLatLng, markersOverlay.Markers[index].Position.Lat, markersOverlay.Markers[index].Position.Lng));
+            bunifuGridWayPoint.Rows.Add(index, true, string.Format(StrFormatLatLng, markersOverlay.Markers[index].Position.Lat, markersOverlay.Markers[index].Position.Lng));
         }
         private void Method2(object sender, EventArgs e)
         {
@@ -317,8 +317,8 @@ namespace TestMAP
                 markersOverlay.Markers.Remove(currentMarker);
                 gMapControl1.UpdateRouteLocalPosition(routes);
 
-                bunifuCustomDataGrid1.Rows.RemoveAt(currentMarkerInd);
-                foreach (DataGridViewRow Row in bunifuCustomDataGrid1.Rows)
+                bunifuGridWayPoint.Rows.RemoveAt(currentMarkerInd);
+                foreach (DataGridViewRow Row in bunifuGridWayPoint.Rows)
                 {
                     if (Convert.ToInt32(Row.Cells["ColNoMarker"].Value) > currentMarkerInd)
                     {
@@ -339,7 +339,7 @@ namespace TestMAP
             // Перерисовка
             gMapControl1.UpdateRouteLocalPosition(routes);
             // Очистка таблицы от точек
-            bunifuCustomDataGrid1.Rows.Clear();
+            bunifuGridWayPoint.Rows.Clear();
 
         }
 
@@ -523,19 +523,28 @@ namespace TestMAP
         
         private void Form1_Resize(object sender, EventArgs e)
         {
+            int DeltaX = 10;
+            int DeltaY = 10;
+            MetroForm FormTmp = sender as MetroForm;
+            panelMapWay.Width = FormTmp.Size.Width - panelMenuGradient.Bounds.Right - panelMenuGradient.Location.X - DeltaX;
+            panelMapWay.Height = panelMenuGradient.Height;
+            panelMapWay.Location = new Point(panelMenuGradient.Location.X + panelMenuGradient.Width + DeltaX, panelMenuGradient.Location.Y);
+            panelMap.Height = panelMapWay.Height - panelTab.Height - DeltaY;
+            bunifuGridWayPoint.Width = bunifuFlatButton5.Bounds.Left - 5;
+            
         }
 
         private void bunifuCustomDataGrid1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (bunifuCustomDataGrid1.Columns[e.ColumnIndex] == ColDelMarker)
+            if (bunifuGridWayPoint.Columns[e.ColumnIndex] == ColDelMarker)
             {
-                bunifuCustomDataGrid1.Rows.RemoveAt(e.RowIndex);
+                bunifuGridWayPoint.Rows.RemoveAt(e.RowIndex);
 
                 routes.Points.RemoveAt(e.RowIndex);
                 markersOverlay.Markers.RemoveAt(e.RowIndex);
                 gMapControl1.UpdateRouteLocalPosition(routes);
 
-                foreach (DataGridViewRow Row in bunifuCustomDataGrid1.Rows)
+                foreach (DataGridViewRow Row in bunifuGridWayPoint.Rows)
                 {
                     if (Convert.ToInt32(Row.Cells["ColNoMarker"].Value) > e.RowIndex)
                     {
@@ -550,7 +559,7 @@ namespace TestMAP
         {
             if (e.ColumnIndex == ColInMission.Index && e.RowIndex != -1)
             {
-                if (bunifuCustomDataGrid1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString() == "True")
+                if (bunifuGridWayPoint.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString() == "True")
                 {
                     switchChekedMarker(e.RowIndex, true);
                 }
@@ -565,24 +574,26 @@ namespace TestMAP
         {
             if (e.ColumnIndex == ColInMission.Index && e.RowIndex != -1)
             {
-                bunifuCustomDataGrid1.CommitEdit(DataGridViewDataErrorContexts.Commit);
+                bunifuGridWayPoint.CommitEdit(DataGridViewDataErrorContexts.Commit);
             }
         }
 
         private void MenuButton_Click(object sender, EventArgs e)
         {
-            if (MenuGradientPanel.Size.Width == 60)
+            if (panelMenuGradient.Size.Width == 60)
             {
-                MenuGradientPanel.Width = 260;
-                MenuGradientPanel.Visible = false;
-                PanelAnimator.ShowSync(MenuGradientPanel);
+                panelMenuGradient.Width = 260;
+                panelMenuGradient.Visible = false;
+                animatorPanelGradient.ShowSync(panelMenuGradient);
             }
             else
             {
-                MenuGradientPanel.Width = 60;
-                MenuGradientPanel.Visible = false;
-                PanelAnimator.ShowSync(MenuGradientPanel);
+                panelMenuGradient.Width = 60;
+                panelMenuGradient.Visible = false;
+                animatorPanelGradient.ShowSync(panelMenuGradient);
             }
+
+            Form1_Resize(this, e);
         }
 
 
