@@ -22,7 +22,10 @@ namespace TestMAP
         private System.Windows.Forms.DataGridViewTextBoxColumn ColNoMarker;
         private System.Windows.Forms.DataGridViewCheckBoxColumn ColInMission;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColLatLon;
-        private System.Windows.Forms.DataGridViewButtonColumn ColDelMarker;
+        private System.Windows.Forms.DataGridViewImageColumn ColDelMarker;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ColDown;
+        private MyDGVCheckBoxColumn ColDownMode;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ColSpeed; 
 
         //Переменная отвечающая за состояние нажатия 
         //левой клавиши мыши.
@@ -62,31 +65,54 @@ namespace TestMAP
             this.ColNoMarker = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColInMission = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.ColLatLon = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColDelMarker = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.ColDelMarker = new System.Windows.Forms.DataGridViewImageColumn();
+            this.ColDown = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColDownMode = new TestMAP.MyDGVCheckBoxColumn();
+            this.ColSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+
             this.bunifuGridWayPoint.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ColNoMarker,
             this.ColInMission,
             this.ColLatLon,
-            this.ColDelMarker});
-
+            this.ColDelMarker,
+            ColDown,
+            ColDownMode,
+            ColSpeed
+            });
+            
             ColNoMarker.HeaderText = "№ Marker";
             ColNoMarker.Name = "ColNoMarker";
-            ColNoMarker.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            ColNoMarker.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
             //ColNoMarker.Resizable = System.Windows.Forms.DataGridViewTriState.True;
 
 
             ColInMission.HeaderText = "In Mission";
             ColInMission.Name = "ColInMission";
-            ColInMission.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            ColInMission.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
 
             ColLatLon.HeaderText = "Lat / Lon";
             ColLatLon.Name = "ColLatLng";
-            ColLatLon.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            ColLatLon.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
 
             ColDelMarker.HeaderText = "Delete";
             ColDelMarker.Name = "ColDelMarker";
-            ColDelMarker.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            ColDelMarker.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
+            ColDelMarker.Image = global::TestMAP.Properties.Resources.delete_1;
 
+            ColDown.HeaderText = "Down";
+            ColDown.Name = "ColDown";
+            ColDown.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+
+
+            ColDownMode.HeaderText = "Down Mode";
+            ColDownMode.Name = "ColDownMode";
+            ColDownMode.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            ColDownMode.Label = "Depth";
+            ColDownMode.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+
+            ColSpeed.HeaderText = "Speed";
+            ColSpeed.Name = "ColSpeed";
+            ColSpeed.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
 
             bitmapBlackCh =
                 Bitmap.FromFile(Application.StartupPath + @"\BlackCheck.png") as Bitmap;
@@ -233,7 +259,7 @@ namespace TestMAP
                     gMapControl1.UpdateRouteLocalPosition(routes);
                     //Вывод координат маркера в подсказке.
                     currentMarker.ToolTipText =
-                        string.Format("{0},{1}", point.Lat, point.Lng);
+                        string.Format(StrFormatLatLng, point.Lat, point.Lng);
 
                     // Изменение  Lat/Lng в таблице вместе с переносом маркера
                     bunifuGridWayPoint.Rows[currentMarkerInd].Cells[ColLatLon.Name].Value = string.Format(StrFormatLatLng, point.Lat, point.Lng);
@@ -536,7 +562,7 @@ namespace TestMAP
 
         private void bunifuCustomDataGrid1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (bunifuGridWayPoint.Columns[e.ColumnIndex] == ColDelMarker)
+            if (bunifuGridWayPoint.Columns[e.ColumnIndex] == this.ColDelMarker)
             {
                 bunifuGridWayPoint.Rows.RemoveAt(e.RowIndex);
 
