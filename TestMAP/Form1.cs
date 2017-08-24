@@ -23,9 +23,9 @@ namespace TestMAP
         private System.Windows.Forms.DataGridViewCheckBoxColumn ColInMission;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColLatLon;
         private System.Windows.Forms.DataGridViewImageColumn ColDelMarker;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ColDown;
+        private MaskedEditColumn ColDown;
         private MyDGVCheckBoxColumn ColDownMode;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ColSpeed; 
+        private MaskedEditColumn ColSpeed;
 
         //Переменная отвечающая за состояние нажатия 
         //левой клавиши мыши.
@@ -46,7 +46,6 @@ namespace TestMAP
         private GMap.NET.WindowsForms.GMapOverlay markersOverlay;
         private GMap.NET.WindowsForms.GMapOverlay routOverlay;
         GMap.NET.WindowsForms.GMapRoute routes;
-        GMap.NET.WindowsForms.GMapMarker markers;
         Bitmap bitmapBlackCh;
         Bitmap bitmapBlackNCh;
 
@@ -59,27 +58,27 @@ namespace TestMAP
             InitializeComponent();
             MyInitializeComponent();
         }
-
         private void MyInitializeComponent()
         {
             this.ColNoMarker = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColInMission = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.ColLatLon = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColDelMarker = new System.Windows.Forms.DataGridViewImageColumn();
-            this.ColDown = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColDown = new TestMAP.MaskedEditColumn();
             this.ColDownMode = new TestMAP.MyDGVCheckBoxColumn();
-            this.ColSpeed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColSpeed = new TestMAP.MaskedEditColumn();
+
 
             this.bunifuGridWayPoint.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ColNoMarker,
             this.ColInMission,
             this.ColLatLon,
-            this.ColDelMarker,
-            ColDown,
-            ColDownMode,
-            ColSpeed
+            this.ColDown,
+            this.ColDownMode,
+            this.ColSpeed,
+            this.ColDelMarker
             });
-            
+
             ColNoMarker.HeaderText = "№ Marker";
             ColNoMarker.Name = "ColNoMarker";
             ColNoMarker.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
@@ -102,7 +101,7 @@ namespace TestMAP
             ColDown.HeaderText = "Down";
             ColDown.Name = "ColDown";
             ColDown.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-
+            ColDown.Mask = @"0000\.0\m";
 
             ColDownMode.HeaderText = "Down Mode";
             ColDownMode.Name = "ColDownMode";
@@ -113,6 +112,7 @@ namespace TestMAP
             ColSpeed.HeaderText = "Speed";
             ColSpeed.Name = "ColSpeed";
             ColSpeed.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            ColSpeed.Mask = @"000\%";
 
             bitmapBlackCh =
                 Bitmap.FromFile(Application.StartupPath + @"\BlackCheck.png") as Bitmap;
@@ -319,6 +319,14 @@ namespace TestMAP
             routes.Points.RemoveAt(Index);
             markersOverlay.Markers.RemoveAt(Index);
         }
+        void updateToolTipText()
+        {
+
+            for (int i = 0; i < routes.Points.Count; i++)
+            {
+                markersOverlay.Markers[i].ToolTipText = i.ToString();
+            }
+        }
 
         void switchChekedMarker(int Index, bool inMission)
         {
@@ -330,7 +338,12 @@ namespace TestMAP
         private void Method1(object sender, EventArgs e)
         {
             int index = AddMarkerToEnd(CurrentMenuPoint.X, CurrentMenuPoint.Y, true);
+            markersOverlay.Markers[index].ToolTipText = index.ToString();
+            markersOverlay.Markers[index].ToolTipMode = MarkerTooltipMode.Always;
             bunifuGridWayPoint.Rows.Add(index, true, string.Format(StrFormatLatLng, markersOverlay.Markers[index].Position.Lat, markersOverlay.Markers[index].Position.Lng));
+            bunifuGridWayPoint.Rows[index].Cells["ColDown"].Value = "0003.0m";
+            bunifuGridWayPoint.Rows[index].Cells["ColSpeed"].Value = "070%";
+            
         }
         private void Method2(object sender, EventArgs e)
         {
@@ -348,7 +361,8 @@ namespace TestMAP
                 {
                     if (Convert.ToInt32(Row.Cells["ColNoMarker"].Value) > currentMarkerInd)
                     {
-                        Row.Cells["ColNoMarker"].Value = Convert.ToInt32(Row.Cells["ColNoMarker"].Value) - 1;
+                        Row.Cells["ColNoMarker"].Value = Row.Index.ToString();
+                        markersOverlay.Markers[Row.Index].ToolTipText = Row.Index.ToString();
                     }                                     
                 }
             }
@@ -426,6 +440,8 @@ namespace TestMAP
                 GMapMarkerImage m = item as GMapMarkerImage;
                 m.Pen.Dispose();
                 m.Pen = null;
+                //Возвращаем значение подписи маркера равное его порядковому номеру
+                m.ToolTipText = routes.Points.IndexOf(m.Position).ToString();
             }
         }
 
@@ -574,7 +590,8 @@ namespace TestMAP
                 {
                     if (Convert.ToInt32(Row.Cells["ColNoMarker"].Value) > e.RowIndex)
                     {
-                        Row.Cells["ColNoMarker"].Value = Convert.ToInt32(Row.Cells["ColNoMarker"].Value) - 1;
+                        Row.Cells["ColNoMarker"].Value = Row.Index.ToString();
+                        markersOverlay.Markers[Row.Index].ToolTipText = Row.Index.ToString();
                     }
                 }
 
