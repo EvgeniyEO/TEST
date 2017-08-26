@@ -26,6 +26,8 @@ namespace TestMAP
         private MaskedEditColumn ColDown;
         private MyDGVCheckBoxColumn ColDownMode;
         private MaskedEditColumn ColSpeed;
+        private System.Windows.Forms.Panel panelSettings;
+        private System.Windows.Forms.Panel panelManual;
 
         //Переменная отвечающая за состояние нажатия 
         //левой клавиши мыши.
@@ -51,7 +53,6 @@ namespace TestMAP
 
         
         List<PointLatLng> polygonPoints1 = new List<PointLatLng>();
-        Size MetroTabControlSize = new Size(1498, 262);
 
         public Form1()
         {
@@ -67,7 +68,41 @@ namespace TestMAP
             this.ColDown = new TestMAP.MaskedEditColumn();
             this.ColDownMode = new TestMAP.MyDGVCheckBoxColumn();
             this.ColSpeed = new TestMAP.MaskedEditColumn();
+            this.panelSettings = new System.Windows.Forms.Panel();
+            this.panelManual = new System.Windows.Forms.Panel();
 
+
+            // 
+            // panelSettings
+            // 
+            this.panelSettings.SuspendLayout();
+            this.Controls.Add(this.panelSettings);
+            this.panelSettings.ResumeLayout(false);
+
+            this.panelSettings.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            //this.panelMapWay.Controls.Add(this.panelTab);
+            //this.panelMapWay.Controls.Add(this.panelMap);
+            //this.animatorPanelGradient.SetDecoration(this.panelSettings, BunifuAnimatorNS.DecorationType.None);
+            this.panelSettings.Location = new System.Drawing.Point(310, 30);
+            this.panelSettings.Name = "panelSettings";
+            this.panelSettings.Size = new System.Drawing.Size(1517, 880);
+            this.panelSettings.TabIndex = 10;
+
+            // 
+            // panelManual
+            // 
+            this.panelManual.SuspendLayout();
+            this.Controls.Add(this.panelManual);
+            this.panelManual.ResumeLayout(false);
+
+            this.panelManual.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            //this.panelMapWay.Controls.Add(this.panelTab);
+            //this.panelMapWay.Controls.Add(this.panelMap);
+            //this.animatorPanelGradient.SetDecoration(this.panelSettings, BunifuAnimatorNS.DecorationType.None);
+            this.panelManual.Location = new System.Drawing.Point(310, 30);
+            this.panelManual.Name = "panelManual";
+            this.panelManual.Size = new System.Drawing.Size(1517, 880);
+            this.panelManual.TabIndex = 10;
 
             this.bunifuGridWayPoint.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ColNoMarker,
@@ -123,6 +158,9 @@ namespace TestMAP
             this.bunifuGridWayPoint.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellValueChanged);
             this.bunifuGridWayPoint.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellContentClick);
             this.bunifuGridWayPoint.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellClick);
+
+
+
 
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -243,7 +281,7 @@ namespace TestMAP
             //Проверка, что нажата левая клавиша мыши.
             if (e.Button == System.Windows.Forms.MouseButtons.Left && isLeftButtonDown)
             {
-                if (currentMarker != null)
+                if (currentMarker != null && currentMarkerInd >= 0)
                 {
                     PointLatLng point =
                         gMapControl1.FromLocalToLatLng(e.X, e.Y);
@@ -404,9 +442,10 @@ namespace TestMAP
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    isLeftButtonDown = true;
-                    if (currentMarker != null)
+                    
+                    if (currentMarker != null && isLeftButtonDown == false)
                     {
+                        isLeftButtonDown = true;
                         PointLatLng point = currentMarker.Position;
                         currentMarkerInd = routes.Points.IndexOf(point);
                     }
@@ -434,12 +473,15 @@ namespace TestMAP
         //если нет действий с маркером.
         void mapControl_OnMarkerLeave(GMapMarker item)
         {
-            if (item is GMapMarkerImage)
+            if (item is GMapMarkerImage && isLeftButtonDown == false)
             {
                 currentMarker = null;
                 GMapMarkerImage m = item as GMapMarkerImage;
-                m.Pen.Dispose();
-                m.Pen = null;
+                if ( m.Pen != null )
+                {
+                    m.Pen.Dispose();
+                    m.Pen = null;
+                }
                 //Возвращаем значение подписи маркера равное его порядковому номеру
                 m.ToolTipText = routes.Points.IndexOf(m.Position).ToString();
             }
@@ -449,7 +491,7 @@ namespace TestMAP
         //если маркер выделен клавишей Enter
         void mapControl_OnMarkerEnter(GMapMarker item)
         {
-            if (item is GMapMarkerImage)
+            if (item is GMapMarkerImage && isLeftButtonDown == false)
             {
                 currentMarker = item as GMapMarkerImage;
                 currentMarker.Pen = new Pen(Brushes.Red, 2);
@@ -568,11 +610,22 @@ namespace TestMAP
             int DeltaX = 10;
             int DeltaY = 10;
             MetroForm FormTmp = sender as MetroForm;
-            panelMapWay.Width = FormTmp.Size.Width - panelMenuGradient.Bounds.Right - panelMenuGradient.Location.X - DeltaX;
-            panelMapWay.Height = panelMenuGradient.Height;
-            panelMapWay.Location = new Point(panelMenuGradient.Location.X + panelMenuGradient.Width + DeltaX, panelMenuGradient.Location.Y);
+            var MainPanelWidth = FormTmp.Size.Width - panelMenuGradient.Bounds.Right - panelMenuGradient.Location.X - DeltaX;
+            var MainPanelHeight = panelMenuGradient.Height;
+            Point MainPanelLocation = new Point(panelMenuGradient.Location.X + panelMenuGradient.Width + DeltaX, panelMenuGradient.Location.Y);
+            panelMapWay.Width = MainPanelWidth;
+            panelMapWay.Height = MainPanelHeight;
+            panelMapWay.Location = MainPanelLocation;
             panelMap.Height = panelMapWay.Height - panelTab.Height - DeltaY;
             bunifuGridWayPoint.Width = bunifuFlatButton5.Bounds.Left - 5;
+
+            panelSettings.Width = MainPanelWidth;
+            panelSettings.Height = MainPanelHeight;
+            panelSettings.Location = MainPanelLocation;
+
+            panelManual.Width = MainPanelWidth;
+            panelManual.Height = MainPanelHeight;
+            panelManual.Location = MainPanelLocation;
             
         }
 
@@ -628,6 +681,7 @@ namespace TestMAP
                 panelMenuGradient.Width = 260;
                 panelMenuGradient.Visible = false;
                 animatorPanelGradient.ShowSync(panelMenuGradient);
+
             }
             else
             {
@@ -637,6 +691,29 @@ namespace TestMAP
             }
 
             Form1_Resize(this, e);
+        }
+
+        private void FlatButtonMapWay_Click(object sender, EventArgs e)
+        {
+            //panelMapWay.Visible = true;
+            panelSettings.Visible = false;
+            panelManual.Visible = false;
+
+            animatorPanelMapWay.ShowSync(panelMapWay);
+        }
+
+        private void FlatButtonSettings_Click(object sender, EventArgs e)
+        {
+            panelSettings.Visible = true;
+            panelMapWay.Visible = false;
+            panelManual.Visible = false;
+        }
+
+        private void FlatButtonManual_Click(object sender, EventArgs e)
+        {
+            panelManual.Visible = true;
+            panelSettings.Visible = false;
+            panelMapWay.Visible = false;
         }
 
 
