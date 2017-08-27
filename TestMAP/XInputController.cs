@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Drawing;
 using SharpDX.XInput;
@@ -20,7 +21,7 @@ namespace TestMAP
 
         public XInputController()
         {
-            controller = new Controller(UserIndex.One);
+            controller = new Controller(UserIndex.Any);
             connected = controller.IsConnected;
         }
 

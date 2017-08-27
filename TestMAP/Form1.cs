@@ -23,35 +23,33 @@ namespace TestMAP
         private System.Windows.Forms.DataGridViewCheckBoxColumn ColInMission;
         private System.Windows.Forms.DataGridViewTextBoxColumn ColLatLon;
         private System.Windows.Forms.DataGridViewImageColumn ColDelMarker;
-        private MaskedEditColumn ColDown;
-        private MyDGVCheckBoxColumn ColDownMode;
-        private MaskedEditColumn ColSpeed;
+        private TestMAP.MaskedEditColumn ColDown;
+        private TestMAP.MyDGVCheckBoxColumn ColDownMode;
+        private TestMAP.MaskedEditColumn ColSpeed;
         private System.Windows.Forms.Panel panelSettings;
         private System.Windows.Forms.Panel panelManual;
+        //Переменная нового класса,
+        //для замены стандартного маркера.
+        private TestMAP.GMapMarkerImage currentMarker;
+        //Список маркеров и роутов
+        private GMap.NET.WindowsForms.GMapOverlay markersOverlay;
+        private GMap.NET.WindowsForms.GMapOverlay routOverlay;
+        private GMap.NET.WindowsForms.GMapRoute routes;
+        private Bitmap bitmapBlackCh;
+        private Bitmap bitmapBlackNCh;
+
+        private Bunifu.Framework.UI.BunifuTextbox ManualTextboxX;
+        private TestMAP.DirectInputController DirectInputCntrl;
 
         //Переменная отвечающая за состояние нажатия 
         //левой клавиши мыши.
         private bool isLeftButtonDown = false;
-
         //Таймер для вывода
         private Timer blinkTimer = new Timer();
-
-        //Переменная нового класса,
-        //для замены стандартного маркера.
-        private TestMAP.GMapMarkerImage currentMarker;
 
         int currentMarkerInd = 0;
         string StrFormatLatLng = "{0:0.0000000} - {1:0.0000000}";
         Point CurrentMenuPoint;
-
-        //Список маркеров и роутов
-        private GMap.NET.WindowsForms.GMapOverlay markersOverlay;
-        private GMap.NET.WindowsForms.GMapOverlay routOverlay;
-        GMap.NET.WindowsForms.GMapRoute routes;
-        Bitmap bitmapBlackCh;
-        Bitmap bitmapBlackNCh;
-
-        
         List<PointLatLng> polygonPoints1 = new List<PointLatLng>();
 
         public Form1()
@@ -61,6 +59,7 @@ namespace TestMAP
         }
         private void MyInitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.ColNoMarker = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColInMission = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.ColLatLon = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -70,8 +69,30 @@ namespace TestMAP
             this.ColSpeed = new TestMAP.MaskedEditColumn();
             this.panelSettings = new System.Windows.Forms.Panel();
             this.panelManual = new System.Windows.Forms.Panel();
+            this.DirectInputCntrl = new DirectInputController();
 
+            this.DirectInputCntrl.JoystickXchange += JoystickX_change;
+            List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
+            DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
 
+            this.ManualTextboxX = new Bunifu.Framework.UI.BunifuTextbox();
+            this.panelManual.Controls.Add(this.ManualTextboxX);
+
+            // 
+            // ManualTextboxX
+            // 
+            //this.ManualTextboxX.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("bunifuTextbox1.BackgroundImage")));
+            //this.ManualTextboxX.Icon = null;
+            this.ManualTextboxX.BackColor = System.Drawing.Color.Silver;
+            this.ManualTextboxX.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.ManualTextboxX.ForeColor = System.Drawing.Color.SeaGreen;
+            this.ManualTextboxX.Location = new System.Drawing.Point(39, 449);
+            this.ManualTextboxX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ManualTextboxX.Name = "ManualTextboxX";
+            this.ManualTextboxX.Size = new System.Drawing.Size(195, 114);
+            this.ManualTextboxX.TabIndex = 4;
+            this.ManualTextboxX.text = "ManualTextboxX";
+            
             // 
             // panelSettings
             // 
@@ -162,6 +183,21 @@ namespace TestMAP
 
 
 
+        }
+
+
+        private void MyDisposeComponent()
+        {
+            if (DirectInputCntrl != null)
+            {
+                DirectInputCntrl.StopCapture();
+                DirectInputCntrl.Dispose();
+            }
+            
+        }
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            MyDisposeComponent();
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -715,7 +751,28 @@ namespace TestMAP
             panelSettings.Visible = false;
             panelMapWay.Visible = false;
         }
+        delegate void SetTextBoxCallback(string text, Control TextBox);
 
+        private void SetTextBox(string text, Control TextBox)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (TextBox.InvokeRequired)
+            {
+                SetTextBoxCallback d = new SetTextBoxCallback(SetTextBox);
+                this.Invoke(d, new object[] { text, TextBox });
+            }
+            else
+            {
+                TextBox.Text = text;
+            }
+        }
+
+        private void JoystickX_change(object sender, JoystickButtonPressedEventArgs e)  
+        {
+            SetTextBox(e.Value.ToString(), bunifuMetroTextbox1);
+        }
 
     }
 }
