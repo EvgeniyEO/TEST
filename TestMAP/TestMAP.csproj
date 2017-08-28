@@ -41,6 +41,10 @@
     <Reference Include="GMap.NET.WindowsForms">
       <HintPath>..\..\..\lib\Release-NETv4.0\GMap.NET.WindowsForms.dll</HintPath>
     </Reference>
+    <Reference Include="LiteNetLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiteNetLib.0.7.4.1\lib\net35\LiteNetLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MetroFramework">
       <HintPath>..\..\..\metroFrameworklib\MetroFramework.dll</HintPath>
     </Reference>
@@ -84,6 +88,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data.cs" />
     <Compile Include="DataGridCustonColumn.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -99,6 +104,7 @@
     <Compile Include="OpenSeaMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UDPClient.cs" />
     <Compile Include="WMSProvider .cs" />
     <Compile Include="XInputController.cs" />
     <EmbeddedResource Include="Form1.resx">
