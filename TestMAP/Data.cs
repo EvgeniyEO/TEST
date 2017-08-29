@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestMAP
 {
-    class Data
+    class Data1
     {
         
     }

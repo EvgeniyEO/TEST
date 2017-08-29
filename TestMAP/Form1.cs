@@ -13,6 +13,9 @@ using GMap.NET.WindowsForms;
 using MetroFramework.Forms;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsForms.Markers;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace TestMAP
 {
@@ -40,6 +43,8 @@ namespace TestMAP
 
         private Bunifu.Framework.UI.BunifuTextbox ManualTextboxX;
         private TestMAP.DirectInputController DirectInputCntrl;
+
+        private TestMAP.UDPClientClass UDPClient;
 
         //Переменная отвечающая за состояние нажатия 
         //левой клавиши мыши.
@@ -74,6 +79,11 @@ namespace TestMAP
             this.DirectInputCntrl.JoystickXchange += JoystickX_change;
             List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
             DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
+
+            this.UDPClient = new UDPClientClass(50000);
+            UDPClient.ReceiveData += UDPClient_ReceiveData;
+            UDPClient.StartReceiving();
+
 
             this.ManualTextboxX = new Bunifu.Framework.UI.BunifuTextbox();
             this.panelManual.Controls.Add(this.ManualTextboxX);
@@ -184,7 +194,6 @@ namespace TestMAP
 
 
         }
-
 
         private void MyDisposeComponent()
         {
@@ -378,8 +387,8 @@ namespace TestMAP
         {
             PointLatLng point = gMapControl1.FromLocalToLatLng((int)x, (int)y);
             GMapMarker marker = new GMapMarkerImage(point, inMission ? bitmapBlackCh : bitmapBlackNCh);
-            marker.ToolTipMode = MarkerTooltipMode.OnMouseOver;
-            marker.ToolTipText = string.Format(StrFormatLatLng, point.Lat, point.Lng);
+            marker.ToolTipMode = inMission ? MarkerTooltipMode.Always : MarkerTooltipMode.OnMouseOver;
+            marker.ToolTipText = Index.ToString();
             // Добавляем маркер в список маркеров.
             markersOverlay.Markers.Insert(Index, marker);
             // Добавляем точку маркера в маршрут
@@ -531,6 +540,7 @@ namespace TestMAP
             {
                 currentMarker = item as GMapMarkerImage;
                 currentMarker.Pen = new Pen(Brushes.Red, 2);
+                currentMarker.ToolTipText = string.Format(StrFormatLatLng, currentMarker.Position.Lat, currentMarker.Position.Lng);
             }
         }
 
@@ -715,6 +725,7 @@ namespace TestMAP
             if (panelMenuGradient.Size.Width == 60)
             {
                 panelMenuGradient.Width = 260;
+                Form1_Resize(this, e);
                 panelMenuGradient.Visible = false;
                 animatorPanelGradient.ShowSync(panelMenuGradient);
 
@@ -722,11 +733,10 @@ namespace TestMAP
             else
             {
                 panelMenuGradient.Width = 60;
+                Form1_Resize(this, e);
                 panelMenuGradient.Visible = false;
                 animatorPanelGradient.ShowSync(panelMenuGradient);
-            }
-
-            Form1_Resize(this, e);
+            }  
         }
 
         private void FlatButtonMapWay_Click(object sender, EventArgs e)
@@ -774,5 +784,54 @@ namespace TestMAP
             SetTextBox(e.Value.ToString(), bunifuMetroTextbox1);
         }
 
+        void UDPClient_ReceiveData(object sender, UDPClientClass.UdpClientEventArgs e)
+        {
+            var data = Data.FromBytes(e.Data);
+            SetTextBox(Encoding.ASCII.GetString(e.Data), bunifuMetroTextbox1);
+  
+            if (sender is UDPClientClass)
+            {
+                UDPClientClass client = sender as UDPClientClass;
+                client.Send(Data.ObjectToByteArray(data), Marshal.SizeOf(data), e.endPoint);
+            }
+        }
+
+    }
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    class Data
+    {
+        	UInt16	pacheader;		/* Title is a constant and equal 0xABCD */
+	        byte	type;			/* Type of message */
+	        byte	len;			/* size of buf; < MAX_BUF unsigned chars */
+            UInt16 checksum;
+            public static Data FromBytes(byte[] bytes)
+            {
+                GCHandle gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+                var data = (Data)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(Data));
+                gcHandle.Free();
+                return data;
+            }
+            public static byte[] ObjectToByteArray(Object obj)
+            {
+                //BinaryFormatter bf = new BinaryFormatter();
+                //using (var ms = new MemoryStream())
+                //{
+                //    bf.Serialize(ms, obj);
+                //    return ms.ToArray();
+                //}
+
+                var size = Marshal.SizeOf(obj);
+                // Both managed and unmanaged buffers required.
+                var bytes = new byte[size];
+                var ptr = Marshal.AllocHGlobal(size);
+                // Copy object byte-to-byte to unmanaged memory.
+                Marshal.StructureToPtr(obj, ptr, false);
+                // Copy data from unmanaged memory to managed buffer.
+                Marshal.Copy(ptr, bytes, 0, size);
+                // Release unmanaged memory.
+                Marshal.FreeHGlobal(ptr);
+
+                return bytes;
+            }
     }
 }

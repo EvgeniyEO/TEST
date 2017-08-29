@@ -21,6 +21,10 @@ namespace TestMAP
 
         }
 
+        public void Send(byte[] Data, int Size, IPEndPoint endPoint)
+        {
+            client.Send(Data, Size, endPoint);
+        }
         public void StartReceiving()
         {
             client = new UdpClient(ipEndPoint);
@@ -43,8 +47,9 @@ namespace TestMAP
             IPEndPoint ip = new IPEndPoint(IPAddress.Any, 0);
 
             UdpClientEventArgs clientArgs = new UdpClientEventArgs();
-            clientArgs.SizeData = client.EndReceive(result, ref ip);
-            clientArgs.Result = result;
+            clientArgs.Data = client.EndReceive(result, ref ip);
+            clientArgs.Size = clientArgs.Data.Length;
+            clientArgs.endPoint = ip;
             OnReceiveData(clientArgs);
 
             if (!stop)
@@ -66,8 +71,9 @@ namespace TestMAP
 
         public class UdpClientEventArgs : EventArgs
         {
-            public byte[] SizeData { get; set; }
-            public IAsyncResult Result { get; set; }
+            public byte[] Data { get; set; }
+            public int Size { get; set; }
+            public IPEndPoint endPoint { get; set; }
         }
     }
 }
