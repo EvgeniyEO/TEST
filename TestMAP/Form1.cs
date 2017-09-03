@@ -41,10 +41,11 @@ namespace TestMAP
         private Bitmap bitmapBlackCh;
         private Bitmap bitmapBlackNCh;
 
-        private Bunifu.Framework.UI.BunifuTextbox ManualTextboxX;
+        private Bunifu.Framework.UI.BunifuMetroTextbox ManualTextboxX;
         private TestMAP.DirectInputController DirectInputCntrl;
 
         private TestMAP.UDPClientClass UDPClient;
+        private TestMAP.ReceiveBytesData ReceiveData;
 
         //Переменная отвечающая за состояние нажатия 
         //левой клавиши мыши.
@@ -77,16 +78,17 @@ namespace TestMAP
             this.DirectInputCntrl = new DirectInputController();
 
             this.DirectInputCntrl.JoystickXchange += JoystickX_change;
-            List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
-            DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
+            //List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
+            //DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
 
             this.UDPClient = new UDPClientClass(50000);
             UDPClient.ReceiveData += UDPClient_ReceiveData;
             UDPClient.StartReceiving();
 
 
-            this.ManualTextboxX = new Bunifu.Framework.UI.BunifuTextbox();
+            this.ManualTextboxX = new Bunifu.Framework.UI.BunifuMetroTextbox();
             this.panelManual.Controls.Add(this.ManualTextboxX);
+
 
             // 
             // ManualTextboxX
@@ -101,7 +103,8 @@ namespace TestMAP
             this.ManualTextboxX.Name = "ManualTextboxX";
             this.ManualTextboxX.Size = new System.Drawing.Size(195, 114);
             this.ManualTextboxX.TabIndex = 4;
-            this.ManualTextboxX.text = "ManualTextboxX";
+            this.ManualTextboxX.Text = "ManualTextboxX";
+            this.ManualTextboxX.Visible = true;
             
             // 
             // panelSettings
@@ -191,7 +194,10 @@ namespace TestMAP
             this.bunifuGridWayPoint.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.bunifuCustomDataGrid1_CellClick);
 
 
-
+            panelMenuGradient.Width = 280;
+            FlatButtonMapWay.Width = 280;
+            FlatButtonManual.Width = 280;
+            FlatButtonSettings.Width = 280;
 
         }
 
@@ -650,29 +656,50 @@ namespace TestMAP
         //    //Перерисовываем карту.
         //    gMapControl1.Refresh();
         //}
-        
+
         private void Form1_Resize(object sender, EventArgs e)
         {
-            int DeltaX = 10;
-            int DeltaY = 10;
-            MetroForm FormTmp = sender as MetroForm;
-            var MainPanelWidth = FormTmp.Size.Width - panelMenuGradient.Bounds.Right - panelMenuGradient.Location.X - DeltaX;
-            var MainPanelHeight = panelMenuGradient.Height;
-            Point MainPanelLocation = new Point(panelMenuGradient.Location.X + panelMenuGradient.Width + DeltaX, panelMenuGradient.Location.Y);
-            panelMapWay.Width = MainPanelWidth;
-            panelMapWay.Height = MainPanelHeight;
-            panelMapWay.Location = MainPanelLocation;
-            panelMap.Height = panelMapWay.Height - panelTab.Height - DeltaY;
-            bunifuGridWayPoint.Width = bunifuFlatButton5.Bounds.Left - 5;
+            try
+            {
+                int DeltaX = 10;
+                int DeltaY = 10;
+                if (sender is MetroForm)
+                {
+                    MetroForm FormTmp = sender as MetroForm;
+                    var MainPanelWidth = FormTmp.Size.Width - panelMenuGradient.Bounds.Right - panelMenuGradient.Location.X - DeltaX;
+                    var MainPanelHeight = panelMenuGradient.Height;
+                    Point MainPanelLocation = new Point(panelMenuGradient.Location.X + panelMenuGradient.Width + DeltaX, panelMenuGradient.Location.Y);
+                    panelMapWay.Width = MainPanelWidth;
+                    panelMapWay.Height = MainPanelHeight;
+                    panelMapWay.Location = MainPanelLocation;
+                    panelMap.Height = panelMapWay.Height - panelTab.Height - DeltaY;
+                    bunifuGridWayPoint.Width = bunifuFlatButton5.Bounds.Left - 5;
 
-            panelSettings.Width = MainPanelWidth;
-            panelSettings.Height = MainPanelHeight;
-            panelSettings.Location = MainPanelLocation;
+                    if (panelSettings != null)
+                    {
+                        panelSettings.Width = MainPanelWidth;
+                        panelSettings.Height = MainPanelHeight;
+                        panelSettings.Location = MainPanelLocation;
+                    }
 
-            panelManual.Width = MainPanelWidth;
-            panelManual.Height = MainPanelHeight;
-            panelManual.Location = MainPanelLocation;
-            
+                    if (panelManual != null)
+                    {
+                        panelManual.Width = MainPanelWidth;
+                        panelManual.Height = MainPanelHeight;
+                        panelManual.Location = MainPanelLocation;
+                    }
+
+
+                }
+
+            }
+            catch (Exception e1)
+            {
+
+                MessageBox.Show(e1.Message + " / " + e1.HelpLink + " / " + e1.Source + " / " + e1.TargetSite + " / " + e1.Data);
+            }
+
+
         }
 
         private void bunifuCustomDataGrid1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -724,10 +751,14 @@ namespace TestMAP
         {
             if (panelMenuGradient.Size.Width == 60)
             {
-                panelMenuGradient.Width = 260;
+                panelMenuGradient.Width = 280;
                 Form1_Resize(this, e);
                 panelMenuGradient.Visible = false;
+                FlatButtonMapWay.Text = "              Map and Waypoint";
+                FlatButtonManual.Text = "              Manual";
+                FlatButtonSettings.Text = "              Settings";
                 animatorPanelGradient.ShowSync(panelMenuGradient);
+                
 
             }
             else
@@ -735,7 +766,11 @@ namespace TestMAP
                 panelMenuGradient.Width = 60;
                 Form1_Resize(this, e);
                 panelMenuGradient.Visible = false;
+                FlatButtonMapWay.Text = "";
+                FlatButtonManual.Text = "";
+                FlatButtonSettings.Text = "";
                 animatorPanelGradient.ShowSync(panelMenuGradient);
+                
             }  
         }
 
@@ -781,57 +816,24 @@ namespace TestMAP
 
         private void JoystickX_change(object sender, JoystickButtonPressedEventArgs e)  
         {
-            SetTextBox(e.Value.ToString(), bunifuMetroTextbox1);
+            //SetTextBox(e.Value.ToString(), bunifuMetroTextbox1);
         }
 
         void UDPClient_ReceiveData(object sender, UDPClientClass.UdpClientEventArgs e)
         {
-            var data = Data.FromBytes(e.Data);
-            SetTextBox(Encoding.ASCII.GetString(e.Data), bunifuMetroTextbox1);
+            //var data = Data1.FromBytes(e.Data);
+            //var data = Data.FromBytes(e.Data);
+            //SetTextBox(Encoding.ASCII.GetString(e.Data), bunifuMetroTextbox1);
+
+            ReceiveData = new ReceiveBytesData(e.Data);
   
-            if (sender is UDPClientClass)
-            {
-                UDPClientClass client = sender as UDPClientClass;
-                client.Send(Data.ObjectToByteArray(data), Marshal.SizeOf(data), e.endPoint);
-            }
+            //if (sender is UDPClientClass)
+            //{
+            //    UDPClientClass client = sender as UDPClientClass;
+            //    client.Send(Data1.ObjectToByteArray(data), Marshal.SizeOf(data), e.endPoint);
+            //}
         }
 
     }
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    class Data
-    {
-        	UInt16	pacheader;		/* Title is a constant and equal 0xABCD */
-	        byte	type;			/* Type of message */
-	        byte	len;			/* size of buf; < MAX_BUF unsigned chars */
-            UInt16 checksum;
-            public static Data FromBytes(byte[] bytes)
-            {
-                GCHandle gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-                var data = (Data)Marshal.PtrToStructure(gcHandle.AddrOfPinnedObject(), typeof(Data));
-                gcHandle.Free();
-                return data;
-            }
-            public static byte[] ObjectToByteArray(Object obj)
-            {
-                //BinaryFormatter bf = new BinaryFormatter();
-                //using (var ms = new MemoryStream())
-                //{
-                //    bf.Serialize(ms, obj);
-                //    return ms.ToArray();
-                //}
-
-                var size = Marshal.SizeOf(obj);
-                // Both managed and unmanaged buffers required.
-                var bytes = new byte[size];
-                var ptr = Marshal.AllocHGlobal(size);
-                // Copy object byte-to-byte to unmanaged memory.
-                Marshal.StructureToPtr(obj, ptr, false);
-                // Copy data from unmanaged memory to managed buffer.
-                Marshal.Copy(ptr, bytes, 0, size);
-                // Release unmanaged memory.
-                Marshal.FreeHGlobal(ptr);
-
-                return bytes;
-            }
-    }
+   
 }
