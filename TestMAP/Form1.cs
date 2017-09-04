@@ -826,12 +826,13 @@ namespace TestMAP
             //SetTextBox(Encoding.ASCII.GetString(e.Data), bunifuMetroTextbox1);
 
             ReceiveData = new ReceiveBytesData(e.Data);
+
+            if (sender is UDPClientClass)
+            {
+                UDPClientClass client = sender as UDPClientClass;
+                client.Send(ReceiveData.getBytesToSendPacketCA(), ReceiveData.getLenToSendPacketCA(), e.endPoint);
+            }
   
-            //if (sender is UDPClientClass)
-            //{
-            //    UDPClientClass client = sender as UDPClientClass;
-            //    client.Send(Data1.ObjectToByteArray(data), Marshal.SizeOf(data), e.endPoint);
-            //}
         }
 
     }
