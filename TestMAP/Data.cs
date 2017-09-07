@@ -114,7 +114,7 @@ namespace TestMAP
 
         public byte[] getBytesToSendPacketCA()
         {
-            byte[] ret = new byte[sizeHeader+sizePacket_CA];
+            byte[] ret = new byte[getLenToSendPacketCA()];
             byte[] byteCA = StructToByteArray(packet_CA);
             Header headerCA = new Header(0xCA, (byte)sizePacket_CA, this.calc_cs(byteCA, (byte)sizePacket_CA));
             byte[] byteHeader = StructToByteArray(headerCA);

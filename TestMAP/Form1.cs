@@ -78,8 +78,8 @@ namespace TestMAP
             this.DirectInputCntrl = new DirectInputController();
 
             this.DirectInputCntrl.JoystickXchange += JoystickX_change;
-            //List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
-            //DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
+            List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
+            DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
 
             this.UDPClient = new UDPClientClass(50000);
             UDPClient.ReceiveData += UDPClient_ReceiveData;
@@ -198,6 +198,12 @@ namespace TestMAP
             FlatButtonMapWay.Width = 280;
             FlatButtonManual.Width = 280;
             FlatButtonSettings.Width = 280;
+
+            pictureBox1.BackColor = Color.White;
+            pictureBox1.Visible = true;
+
+            // Connect the Paint event of the PictureBox to the event handler method.
+            pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
 
         }
 
@@ -795,6 +801,7 @@ namespace TestMAP
             panelManual.Visible = true;
             panelSettings.Visible = false;
             panelMapWay.Visible = false;
+            pictureBox1.Refresh();
         }
         delegate void SetTextBoxCallback(string text, Control TextBox);
 
@@ -813,10 +820,29 @@ namespace TestMAP
                 TextBox.Text = text;
             }
         }
+        delegate void RefreshPicBoxCallback(Control TextBox);
+        private void RefreshPicBox(Control PicBox)
+        {
+            // InvokeRequired required compares the thread ID of the
+            // calling thread to the thread ID of the creating thread.
+            // If these threads are different, it returns true.
+            if (PicBox.InvokeRequired)
+            {
+                RefreshPicBoxCallback d = new RefreshPicBoxCallback(RefreshPicBox);
+                this.Invoke(d, new object[] { PicBox });
+            }
+            else
+            {
+                PicBox.Refresh();
+            }
+        }
 
         private void JoystickX_change(object sender, JoystickButtonPressedEventArgs e)  
         {
-            //SetTextBox(e.Value.ToString(), bunifuMetroTextbox1);
+            SetTextBox(e.Value.ToString(), ManualTextboxX);
+            joyX = e.Value;
+            //pictureBox1.Refresh();
+            RefreshPicBox(pictureBox1);
         }
 
         void UDPClient_ReceiveData(object sender, UDPClientClass.UdpClientEventArgs e)
@@ -826,7 +852,7 @@ namespace TestMAP
             //SetTextBox(Encoding.ASCII.GetString(e.Data), bunifuMetroTextbox1);
 
             ReceiveData = new ReceiveBytesData(e.Data);
-
+            SetTextBox(ReceiveData.packet_AB.rms_N3.ToString(), ManualTextboxX);
             if (sender is UDPClientClass)
             {
                 UDPClientClass client = sender as UDPClientClass;
@@ -834,6 +860,43 @@ namespace TestMAP
             }
   
         }
+
+        float[] x = { 100.78F, 50.12F, 200.99F };  // Массив х-кординат треугольника
+        float[] y = { 100.45F, 200.77F, 300.18F }; // Массив y-кординат треугольника
+        int joyX = 32767;
+        private void pictureBox1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        {
+            // Создаем локальную версию графического объекта для PictureBox
+            Graphics g = e.Graphics;
+
+            int num = joyX / 4096;
+
+            Rectangle[] rects = { new Rectangle(0, 0, 0, 0)};
+            if (num > 8)
+            {
+                for (int i = 0; i < (num - 8); i++)
+                {
+                    Array.Resize(ref rects, rects.Length + 1);
+                    rects[rects.Length - 1] = new Rectangle(0, 150 + i * 15, 100, 10);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < (7 - num); i++)
+                {
+                    Array.Resize(ref rects, rects.Length + 1);
+                    rects[rects.Length - 1] = new Rectangle(0, 150 - i * 15, 100, 10);
+                }
+            }
+
+            //Rectangle[] rects = { new Rectangle(0, 0, 100, 10), new Rectangle(0, 20, 100, 10), new Rectangle(0, 40, 100, 10) };
+
+            if (rects!=null)
+                g.FillRectangles(Brushes.Black, rects);
+            
+        }
+
+
 
     }
    
