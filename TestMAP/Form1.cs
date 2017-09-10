@@ -16,6 +16,7 @@ using GMap.NET.WindowsForms.Markers;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System.Drawing.Drawing2D;
 
 namespace TestMAP
 {
@@ -78,6 +79,7 @@ namespace TestMAP
             this.DirectInputCntrl = new DirectInputController();
 
             this.DirectInputCntrl.JoystickXchange += JoystickX_change;
+            this.DirectInputCntrl.JoystickYchange += JoystickY_change;
             List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
             DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
 
@@ -845,6 +847,14 @@ namespace TestMAP
             RefreshPicBox(pictureBox1);
         }
 
+        private void JoystickY_change(object sender, JoystickButtonPressedEventArgs e)
+        {
+            //SetTextBox(e.Value.ToString(), ManualTextboxX);
+            joyY = e.Value;
+            //pictureBox1.Refresh();
+            RefreshPicBox(pictureBox1);
+        }
+
         void UDPClient_ReceiveData(object sender, UDPClientClass.UdpClientEventArgs e)
         {
             //var data = Data1.FromBytes(e.Data);
@@ -864,35 +874,156 @@ namespace TestMAP
         float[] x = { 100.78F, 50.12F, 200.99F };  // Массив х-кординат треугольника
         float[] y = { 100.45F, 200.77F, 300.18F }; // Массив y-кординат треугольника
         int joyX = 32767;
+        int joyY = 32767;
         private void pictureBox1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
             // Создаем локальную версию графического объекта для PictureBox
-            Graphics g = e.Graphics;
+            //PictureBox picbox = sender as PictureBox;
+            //Graphics g = e.Graphics;
+            //g.Clear(Color.Transparent);
 
-            int num = joyX / 4096;
+            //int num = joyX / 4096;
 
-            Rectangle[] rects = { new Rectangle(0, 0, 0, 0)};
-            if (num > 8)
+            //Rectangle[] rects = { new Rectangle(0, 0, 0, 0)};
+            //if (num > 8)
+            //{
+            //    for (int i = 0; i < (num - 8); i++)
+            //    {
+            //        Array.Resize(ref rects, rects.Length + 1);
+            //        rects[rects.Length - 1] = new Rectangle(0, 150 + i * 15, 100, 10);
+            //    }
+            //}
+            //else
+            //{
+            //    for (int i = 0; i < (7 - num); i++)
+            //    {
+            //        Array.Resize(ref rects, rects.Length + 1);
+            //        rects[rects.Length - 1] = new Rectangle(0, 150 - i * 15, 100, 10);
+            //    }
+            //}
+
+            //if (rects != null)
+            //    g.FillRectangles(Brushes.Black, rects);
+
+
+            //LinearGradientBrush linGrBrush = new LinearGradientBrush(
+            //   new Point(0, picbox.Height / 2),
+            //   new Point(picbox.Width, picbox.Height / 2),
+            //   Color.Red,
+            //   Color.Blue);
+
+            //g.FillRectangle(linGrBrush, 0, 0, 200, 50);
+            //linGrBrush.GammaCorrection = true;
+            //g.FillRectangle(linGrBrush, 0, 60, 200, 50);
+            //g.FillRectangle(linGrBrush, 60, 120, 200, 50);
+            //g.FillRectangle(linGrBrush, 0, 200, picbox.Width, 50);
+
+
+            PictureBox curentPicBox = sender as PictureBox;
+            Graphics graphics = e.Graphics;
+            graphics.Clear(Color.Transparent);
+            var PicWidth = curentPicBox.Width;
+            var PicHeight = curentPicBox.Height;
+            var koefScale = 3;
+            var ellipseWidth = PicWidth/koefScale;
+            var ellipseHeight = PicHeight/koefScale;
+            Point pointEllipse = new Point((PicWidth-ellipseWidth)/2,(PicHeight-ellipseHeight)/2);
+            Size sizeEllipse = new System.Drawing.Size(ellipseWidth,ellipseHeight);
+            Rectangle rectEllipse = new Rectangle(pointEllipse, sizeEllipse);
+
+
+            // Create a path that consists of a single ellipse.
+            GraphicsPath ellipsePath = new GraphicsPath();
+            ellipsePath.AddEllipse(rectEllipse);
+
+            // Use the path to construct a brush.
+            PathGradientBrush pthGrBrush = new PathGradientBrush(ellipsePath);
+
+            // Set the center point to a location that is not
+            // the centroid of the path.
+            float centerX = joyX * ((float)ellipseWidth / (float)UInt16.MaxValue);
+
+            float centerY = joyY * ((float)ellipseHeight / (float)UInt16.MaxValue);
+            pthGrBrush.CenterPoint = new PointF(pointEllipse.X + centerX, pointEllipse.Y + centerY);
+
+            // Set the color at the center of the path to blue.
+            pthGrBrush.CenterColor = Color.FromArgb(255, 0, 0, 255);
+            pthGrBrush.FocusScales = new PointF(0.2f, 0.2f);
+            // Set the color along the entire boundary 
+            // of the path to aqua.
+            Color[] colors = { Color.FromArgb(255, 0, 255, 255) };
+            pthGrBrush.SurroundColors = colors;
+
+            
+
+            GraphicsPath arrowBottomPath = new GraphicsPath();
+            arrowBottomPath.AddPolygon(new Point[] { new Point(pointEllipse.X + sizeEllipse.Width/2, 0),
+                                                     new Point(pointEllipse.X, pointEllipse.Y - pointEllipse.Y/2), 
+                                                     new Point(pointEllipse.X + sizeEllipse.Width, pointEllipse.Y - pointEllipse.Y/2) });
+
+            Rectangle rectArr = new Rectangle( pointEllipse.X + (sizeEllipse.Width - (sizeEllipse.Width/2))/2,
+                                               pointEllipse.Y - pointEllipse.Y/2,
+                                               sizeEllipse.Width/2,
+                                               PicHeight / 2 - (int)(sizeEllipse.Height*0.90) );
+
+            arrowBottomPath.AddRectangle(rectArr);
+
+
+            Pen tmp = new Pen(Color.FromArgb(255, 0, 255, 255));
+
+
+            graphics.FillPath(tmp.Brush, arrowBottomPath);
+
+            graphics.FillEllipse(pthGrBrush, rectEllipse);
+
+
+            double ang = Math.Atan(2);
+
+           
+            if (joyY < UInt16.MaxValue / 2)
             {
-                for (int i = 0; i < (num - 8); i++)
+                try
                 {
-                    Array.Resize(ref rects, rects.Length + 1);
-                    rects[rects.Length - 1] = new Rectangle(0, 150 + i * 15, 100, 10);
+                    float rectHeight = ((UInt16.MaxValue / 2) - joyY) * ((float)rectArr.Height / (float)(UInt16.MaxValue / 2));
+                    if (rectHeight>0)
+                    {
+                        Rectangle rectArr1 = new Rectangle(rectArr.X,
+                                        rectArr.Y + (rectArr.Height - (int)rectHeight),
+                                        rectArr.Width,
+                                        (int)rectHeight);
+                        if (rectArr1.Height > 0 && rectArr1.Width > 0 )
+                        {
+                            LinearGradientBrush linGrBrush = new LinearGradientBrush(
+                                rectArr1,
+                               Color.Blue,
+                               Color.FromArgb(255, 0, 255, 255),
+                               LinearGradientMode.Vertical);
+
+                            graphics.FillRectangle(linGrBrush, rectArr1);
+                        }
+
+                    }
+
+
+                    float poliHeight = ( joyY) * ((float)ellipseHeight/2 / (float)(UInt16.MaxValue / 2));
+
+                    float k = (sizeEllipse.Width/2 ) * (float)poliHeight / (ellipseHeight/2) ;
+
+                    graphics.FillPolygon(Brushes.Blue,new Point[] { new Point(pointEllipse.X + sizeEllipse.Width/2 + (int)k, (int)poliHeight),
+                                                            new Point(pointEllipse.X + sizeEllipse.Width/2 - (int)k, (int)poliHeight),
+                                                     new Point(pointEllipse.X, pointEllipse.Y - pointEllipse.Y/2), 
+                                                     new Point(pointEllipse.X + sizeEllipse.Width, pointEllipse.Y - pointEllipse.Y/2) });
+
+                    
                 }
-            }
-            else
-            {
-                for (int i = 0; i < (7 - num); i++)
+                catch (Exception e6)
                 {
-                    Array.Resize(ref rects, rects.Length + 1);
-                    rects[rects.Length - 1] = new Rectangle(0, 150 - i * 15, 100, 10);
+                    string tmp2 = e6.Message;
+                    int tr = 1;
+                    throw;
                 }
+                
             }
-
-            //Rectangle[] rects = { new Rectangle(0, 0, 100, 10), new Rectangle(0, 20, 100, 10), new Rectangle(0, 40, 100, 10) };
-
-            if (rects!=null)
-                g.FillRectangles(Brushes.Black, rects);
             
         }
 
