@@ -982,13 +982,14 @@ namespace TestMAP
             //---------------------
             var topArrBX = pointEllipse.X + sizeEllipse.Width / 2;
             var buttomArrBY = pointEllipse.Y + sizeEllipse.Height + (PicHeight - (pointEllipse.Y + sizeEllipse.Height))/2;
-            var buttomArrXBleft = pointEllipse.X;
-            var buttomArrXBright = pointEllipse.X + sizeEllipse.Width;
+            var buttomArrBXleft = pointEllipse.X;
+            var buttomArrBXright = pointEllipse.X + sizeEllipse.Width;
+            var heightArrTrgl = PicHeight - buttomArrBY;
 
             GraphicsPath arrowBBottomPath = new GraphicsPath();
             arrowBBottomPath.AddPolygon(new Point[] { new Point(topArrBX, PicHeight),
-                                                     new Point(buttomArrXBleft, buttomArrBY), 
-                                                     new Point(buttomArrXBright, buttomArrBY) });
+                                                     new Point(buttomArrBXleft, buttomArrBY), 
+                                                     new Point(buttomArrBXright, buttomArrBY) });
 
             Rectangle rectArrB = new Rectangle(pointEllipse.X + (sizeEllipse.Width - (sizeEllipse.Width / 2)) / 2,
                                                pointEllipse.Y + sizeEllipse.Height/2+ (int)(sizeEllipse.Height/2 * 0.866),
@@ -1000,6 +1001,51 @@ namespace TestMAP
             
             graphics.FillPath(pen.Brush, arrowBBottomPath);
             //---------------------
+
+            //---------------------
+            var topArrRX = PicWidth;
+            var topArrRY = pointEllipse.Y + sizeEllipse.Height/2;
+            var buttomArrRYleft = pointEllipse.Y;
+            var buttomArrRYright = pointEllipse.Y + sizeEllipse.Height;
+            var buttomArrRX = topArrRX - sizeEllipse.Height/2;
+            var heightArrRTrgl = PicHeight - buttomArrBY;
+
+            GraphicsPath arrowRBottomPath = new GraphicsPath();
+            arrowRBottomPath.AddPolygon(new Point[] { new Point(topArrRX, topArrRY),
+                                                     new Point(buttomArrRX, buttomArrRYleft), 
+                                                     new Point(buttomArrRX, buttomArrRYright) });
+
+            Rectangle rectArrR = new Rectangle(pointEllipse.X + sizeEllipse.Width / 2 + (int)(sizeEllipse.Width / 2 * 0.866),
+                                               pointEllipse.Y + (sizeEllipse.Height - (sizeEllipse.Height / 2 ))/2,
+                                               buttomArrRX - (pointEllipse.X + sizeEllipse.Width / 2 + (int)(sizeEllipse.Width / 2 * 0.866)),
+                                               sizeEllipse.Height/2);
+                                               
+
+
+            arrowRBottomPath.AddRectangle(rectArrR);
+            
+            graphics.FillPath(pen.Brush, arrowRBottomPath);
+            //---------------------
+
+            var topArrLX = 0;
+            var topArrLY = pointEllipse.Y + sizeEllipse.Height / 2;
+            var buttomArrLYleft = pointEllipse.Y + sizeEllipse.Height;
+            var buttomArrLYright = pointEllipse.Y;
+            var buttomArrLX = sizeEllipse.Height / 2;
+
+            GraphicsPath arrowLBottomPath = new GraphicsPath();
+            arrowLBottomPath.AddPolygon(new Point[] { new Point(topArrLX, topArrLY),
+                                                     new Point(buttomArrLX, buttomArrLYleft), 
+                                                     new Point(buttomArrLX, buttomArrLYright) });
+
+            Rectangle rectArrL = new Rectangle(buttomArrLX,
+                                               pointEllipse.Y + (sizeEllipse.Height - (sizeEllipse.Height / 2)) / 2,
+                                               (int)(pointEllipse.X - pointEllipse.X / 2 + (sizeEllipse.Width / 2 * (1 - 0.866))),
+                                               sizeEllipse.Height / 2);
+
+            arrowLBottomPath.AddRectangle(rectArrL);
+            graphics.FillPath(pen.Brush, arrowLBottomPath);
+
            
             if (joyY < UInt16.MaxValue / 2)
             {
@@ -1009,7 +1055,7 @@ namespace TestMAP
                     Rectangle rectMarkArray;
                     Point[] poligonMarkArray;
 
-                    var heightArray = buttomArrY + rectArr.Height;
+                    var heightArray = buttomArrY + rectArrB.Height;
                     float Height = ((UInt16.MaxValue / 2) - joyY) * ((float)heightArray / (float)(UInt16.MaxValue / 2));
                     if (Height > rectArr.Height)
                     {
@@ -1036,16 +1082,18 @@ namespace TestMAP
                                                       (int)Height);
                         arrayMarkPath.AddRectangle(rectMarkArray);
                     }
+                    if (Height>1)
+                    {
+                        var ttt = (heightArray - (int)Height) < 1 ? 1 : heightArray - (int)Height;
 
-                    var ttt = (heightArray - (int)Height) < 0 ? 0 : heightArray - (int)Height;
+                        LinearGradientBrush linGrBrush = new LinearGradientBrush(
+                                    new Point(rectArr.X, ttt),
+                                    new Point(rectArr.X, rectArr.Y + rectArr.Height+1),
+                                    Color.Blue,
+                                    Color.FromArgb(255, 0, 255, 255));
 
-                    LinearGradientBrush linGrBrush = new LinearGradientBrush(
-                                new Point(rectArr.X, 0),
-                                new Point(rectArr.X, rectArr.Y + rectArr.Height),
-                                Color.Blue,
-                                Color.FromArgb(255, 0, 255, 255));
-
-                    graphics.FillPath(linGrBrush, arrayMarkPath);
+                        graphics.FillPath(linGrBrush, arrayMarkPath);
+                    }   
                 }
                 catch (Exception e6)
                 {
@@ -1062,8 +1110,8 @@ namespace TestMAP
                     Rectangle rectMarkArray;
                     Point[] poligonMarkArray;
 
-                    var heightArray = buttomArrY + rectArrB.Height;
-                    float Height = ((UInt16.MaxValue / 2) - joyY) * ((float)heightArray / (float)(UInt16.MaxValue / 2));
+                    var heightArray = heightArrTrgl + rectArrB.Height;
+                    float Height = (joyY - (UInt16.MaxValue / 2)) * ((float)heightArray / (float)(UInt16.MaxValue / 2));
                     if (Height > rectArrB.Height)
                     {
                         rectMarkArray = new Rectangle(rectArrB.X,
@@ -1071,34 +1119,148 @@ namespace TestMAP
                                                       rectArrB.Width,
                                                       rectArrB.Height);
 
-                        float poliHeight = buttomArrY - (Height - rectArrB.Height);
+                        float poliHeight = heightArrTrgl - (Height - rectArrB.Height);
                         float k = (sizeEllipse.Width / 2) * (float)poliHeight / (ellipseHeight / 2);
 
-                        poligonMarkArray = new Point[] { new Point(topArrX + (int)k, (int)poliHeight),
-                                                         new Point(topArrX - (int)k, (int)poliHeight),
-                                                         new Point(buttomArrXleft, buttomArrY), 
-                                                         new Point(buttomArrXright, buttomArrY) };
+                        poligonMarkArray = new Point[] { new Point(topArrBX + (int)k, PicHeight - (int)poliHeight),
+                                                         new Point(topArrBX - (int)k, PicHeight - (int)poliHeight),
+                                                         new Point(buttomArrBXleft, buttomArrBY), 
+                                                         new Point(buttomArrBXright, buttomArrBY) };
                         arrayMarkPath.AddRectangle(rectMarkArray);
                         arrayMarkPath.AddPolygon(poligonMarkArray);
                     }
                     else
                     {
                         rectMarkArray = new Rectangle(rectArrB.X,
-                                                      rectArrB.Y + (rectArrB.Height - (int)Height),
+                                                      rectArrB.Y,
                                                       rectArrB.Width,
                                                       (int)Height);
                         arrayMarkPath.AddRectangle(rectMarkArray);
                     }
 
                     var ttt = (heightArray - (int)Height) < 0 ? 0 : heightArray - (int)Height;
-
-                    LinearGradientBrush linGrBrush = new LinearGradientBrush(
-                                new Point(rectArrB.X, 0),
-                                new Point(rectArrB.X, rectArrB.Y + rectArrB.Height),
+                    if (Height>1)
+                    {
+                        LinearGradientBrush linGrBrush = new LinearGradientBrush(
+                                new Point(rectArrB.X, rectArrB.Y + (int)Height),
+                                new Point(rectArrB.X, rectArrB.Y),
                                 Color.Blue,
                                 Color.FromArgb(255, 0, 255, 255));
 
-                    graphics.FillPath(linGrBrush, arrayMarkPath);
+                        graphics.FillPath(linGrBrush, arrayMarkPath);
+                    }
+                    
+                }
+                catch (Exception e6)
+                {
+                    string tmp2 = e6.Message;
+                    throw;
+                }
+            }
+
+            if (joyX < UInt16.MaxValue / 2)
+            {
+                try
+                {
+                    GraphicsPath arrayMarkPath = new GraphicsPath();
+                    Rectangle rectMarkArray;
+                    Point[] poligonMarkArray;
+
+                    var heightArray = buttomArrLX + rectArrL.Width;
+                    float Height = ((UInt16.MaxValue / 2) - joyX) * ((float)heightArray / (float)(UInt16.MaxValue / 2));
+                    if (Height > rectArrL.Width)
+                    {
+                        rectMarkArray = new Rectangle(rectArrL.X,
+                                                      rectArrL.Y,
+                                                      rectArrL.Width,
+                                                      rectArrL.Height);
+
+                        float poliHeight = buttomArrLX - (Height - rectArr.Width);
+                        float k = (sizeEllipse.Height / 2) * (float)poliHeight / (ellipseWidth / 2);
+
+                        poligonMarkArray = new Point[] { new Point((int)poliHeight, topArrLY - (int)k),
+                                                         new Point((int)poliHeight, topArrLY + (int)k),
+                                                         new Point(buttomArrLX, buttomArrLYleft), 
+                                                         new Point(buttomArrLX, buttomArrLYright) };
+                        arrayMarkPath.AddRectangle(rectMarkArray);
+                        arrayMarkPath.AddPolygon(poligonMarkArray);
+                    }
+                    else
+                    {
+                        rectMarkArray = new Rectangle(rectArrL.X + (rectArrL.Width - (int)Height),
+                                                      rectArrL.Y ,
+                                                      (int)Height,
+                                                      rectArrL.Height);
+                        arrayMarkPath.AddRectangle(rectMarkArray);
+                    }
+                    if (Height > 1)
+                    {
+                        var ttt = (heightArray - (int)Height) < 1 ? 1 : heightArray - (int)Height;
+
+                        LinearGradientBrush linGrBrush = new LinearGradientBrush(
+                                    new Point(ttt, rectArrL.Y),
+                                    new Point(rectArrL.X + rectArrL.Width + 1, rectArrL.Y),
+                                    Color.Blue,
+                                    Color.FromArgb(255, 0, 255, 255));
+
+                        graphics.FillPath(linGrBrush, arrayMarkPath);
+                    }
+                }
+                catch (Exception e6)
+                {
+                    string tmp2 = e6.Message;
+                    throw;
+                }
+
+            }
+            else
+            {
+                try
+                {
+                    GraphicsPath arrayMarkPath = new GraphicsPath();
+                    Rectangle rectMarkArray;
+                    Point[] poligonMarkArray;
+
+                    var heightArray = heightArrRTrgl + rectArrR.Width;
+                    float Height = (joyX - (UInt16.MaxValue / 2)) * ((float)heightArray / (float)(UInt16.MaxValue / 2));
+                    if (Height > rectArrR.Width)
+                    {
+                        rectMarkArray = new Rectangle(rectArrR.X,
+                                                      rectArrR.Y,
+                                                      rectArrR.Width,
+                                                      rectArrR.Height);
+
+                        float poliHeight = heightArrRTrgl - (Height - rectArrR.Width);
+                        float k = (sizeEllipse.Height / 2) * (float)poliHeight / (ellipseWidth / 2);
+
+                        poligonMarkArray = new Point[] { new Point(PicWidth - (int)poliHeight, topArrRY + (int)k),
+                                                         new Point(PicWidth - (int)poliHeight, topArrRY - (int)k),
+                                                         new Point(buttomArrRX, buttomArrRYleft), 
+                                                         new Point(buttomArrRX, buttomArrRYright) };
+                        arrayMarkPath.AddRectangle(rectMarkArray);
+                        arrayMarkPath.AddPolygon(poligonMarkArray);
+                    }
+                    else
+                    {
+                        rectMarkArray = new Rectangle(rectArrR.X,
+                                                      rectArrR.Y,
+                                                      (int)Height,
+                                                      rectArrR.Height);
+                        arrayMarkPath.AddRectangle(rectMarkArray);
+                    }
+
+                    var ttt = (heightArray - (int)Height) < 0 ? 0 : heightArray - (int)Height;
+                    if (Height > 1)
+                    {
+                        LinearGradientBrush linGrBrush = new LinearGradientBrush(
+                                new Point(rectArrR.X + (int)Height, rectArrR.Y),
+                                new Point(rectArrR.X, rectArrR.Y),
+                                Color.Blue,
+                                Color.FromArgb(255, 0, 255, 255));
+
+                        graphics.FillPath(linGrBrush, arrayMarkPath);
+                    }
+
                 }
                 catch (Exception e6)
                 {
@@ -1108,7 +1270,6 @@ namespace TestMAP
             }
 
             graphics.FillEllipse(pthGrBrush, rectEllipse);
-            
         }
 
 
