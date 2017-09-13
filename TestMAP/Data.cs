@@ -123,6 +123,17 @@ namespace TestMAP
             return ret;
         }
 
+        public byte[] getBytesToSendPacketCA(Packet_CA packet)
+        {
+            byte[] ret = new byte[getLenToSendPacketCA()];
+            byte[] byteCA = StructToByteArray(packet);
+            Header headerCA = new Header(0xCA, (byte)sizePacket_CA, this.calc_cs(byteCA, (byte)sizePacket_CA));
+            byte[] byteHeader = StructToByteArray(headerCA);
+            ret = byteHeader.Concat(byteCA).ToArray();
+
+            return ret;
+        }
+
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     class Header
@@ -141,11 +152,11 @@ namespace TestMAP
         public Header() { }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    class Packet_CA
+    public class Packet_CA
     {
-        public byte axis_X;
-        public byte axis_Y;
-        public byte axis_Z;
+        public byte axis_X = 0x7F;
+        public byte axis_Y = 0x7F;
+        public byte axis_Z = 0x7F;
         public byte button1;
         public byte button2;
         public byte button3;

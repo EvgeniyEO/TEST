@@ -11,30 +11,62 @@ namespace TestMAP
 {
     class UDPClientClass
     {
-        UdpClient client;
+        UdpClient client = null;
         bool stop;
         IPEndPoint ipEndPoint;
+
+        public IPEndPoint ipEndPoint_MUD = new IPEndPoint(IPAddress.Parse("127.0.0.1"),50001);
 
         public UDPClientClass(int port)
         {
             ipEndPoint = new IPEndPoint(IPAddress.Any, port);
-
         }
 
         public void Send(byte[] Data, int Size, IPEndPoint endPoint)
         {
-            client.Send(Data, Size, endPoint);
+            if (client != null )
+            {
+                client.Send(Data, Size, endPoint);
+            }
         }
         public void StartReceiving()
         {
-            client = new UdpClient(ipEndPoint);
-            Receive(); // initial start of our "loop"
+            StopReceiving();
+            stop = false;
+            if (client == null)
+            {
+                client = new UdpClient(ipEndPoint);
+                if (client != null)
+                {
+                    Receive(); // initial start of our "loop"
+                }
+            }
+        }
+
+        public void StartReceiving(int port)
+        {
+            StopReceiving();
+            stop = false;
+            ipEndPoint = new IPEndPoint(IPAddress.Any, port);
+
+            if (client == null)
+            {
+                client = new UdpClient(ipEndPoint);
+                if (client != null)
+                {
+                    Receive(); // initial start of our "loop"
+                }
+            }  
         }
 
         public void StopReceiving()
         {
             stop = true;
-            client.Client.Close();
+            if (client != null)
+            {
+                client.Client.Close();
+                client = null;
+            }   
         }
 
         private void Receive()

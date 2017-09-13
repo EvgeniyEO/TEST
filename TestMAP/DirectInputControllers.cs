@@ -21,14 +21,28 @@ namespace TestMAP
             DescriptorName = InstanceName;
         }
     }
+    class JoystickData
+    {
+        public Guid DescriptorGuid;
+        public string DescriptorName;
+
+        public JoystickData(Guid InstanceGuid, string InstanceName)
+        {
+            DescriptorGuid = InstanceGuid;
+            DescriptorName = InstanceName;
+        }
+    }
+
     class DirectInputController : IDisposable
     {
+        Packet_CA packet_CA = new Packet_CA();
+        bool skip_data = false;
         private DirectInput directInput;
-        private Thread pollingThread;
-        private Joystick joystick;
-        private int startButtonOffset = -1;
-        private int lapButtonOffset = -1;
+        private Thread pollingThread = null;
+        private Joystick joystick = null;
+        private bool Connect = false;
         bool _QuitPolling = false;
+        public bool IsConnect() { return Connect; }
 
         public DirectInputController()
         {
@@ -60,25 +74,21 @@ namespace TestMAP
             return joystickDescriptors;
         }
 
-
-        public void StartCapture(Guid joystickGuid, int startButtonOffset, int lapButtonOffset)
-        {
-            this.startButtonOffset = startButtonOffset;
-            this.lapButtonOffset = lapButtonOffset;
-            StartCapture(joystickGuid);
-        }
-
         public void StartCapture(Guid joystickGuid)
         {
             joystick = new Joystick(directInput, joystickGuid);
-
-            joystick.Properties.BufferSize = 128;
-
-            joystick.Acquire();
-
-            pollingThread = new Thread(new ThreadStart(PollJoystick));
-            pollingThread.Start();
-
+            if ( joystick != null )
+            {
+                joystick.Properties.BufferSize = 128;
+                joystick.Acquire();
+                
+                pollingThread = new Thread(new ThreadStart(PollJoystick));
+                if ( pollingThread != null)
+                {
+                    pollingThread.Start();
+                    Connect = true;
+                }
+            }
         }
 
         public void StopCapture()
@@ -90,12 +100,17 @@ namespace TestMAP
                 {
                     pollingThread.Abort();
                 }
+                pollingThread = null;
             }
 
             if (joystick != null)
             {
+                joystick.Unacquire();
                 joystick.Dispose();
+                joystick = null;
             }
+            _QuitPolling = false;
+            Connect = false;
         }
 
         public void PollJoystick()
@@ -105,8 +120,10 @@ namespace TestMAP
                 joystick.Poll();
                 JoystickUpdate[] datas = joystick.GetBufferedData();
                 JoystickButtonPressedEventArgs args = new JoystickButtonPressedEventArgs();
+                JoystickPacket_CAEventArgs argc_CA = new JoystickPacket_CAEventArgs();
                 foreach (JoystickUpdate state in datas)
                 {
+                    skip_data = false;
                     switch (state.Offset)
                     {
                         case JoystickOffset.RotationX:
@@ -118,17 +135,29 @@ namespace TestMAP
                             OnJoystickRotationYchange(args);
                             break;
                         case JoystickOffset.X:
+                            packet_CA.axis_X = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickXchange(args);
                             break;
                         case JoystickOffset.Y:
+                            packet_CA.axis_Y = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickYchange(args);
                             break;
+                        case JoystickOffset.Buttons0:
+                            packet_CA.button1 = (state.Value > 0) ? (byte)1 : (byte)0;
+                            break;
                         default:
+                            skip_data = true;
                             break;
                     }
                 }
+                if (datas.Length > 0 && !skip_data)
+                {
+                    argc_CA.packet_CA = packet_CA;
+                    OnPacket_CA_change(argc_CA);
+                }
+                
 
                 Thread.Sleep(10);
             }
@@ -179,6 +208,17 @@ namespace TestMAP
         }
 
         public event EventHandler<JoystickButtonPressedEventArgs> JoystickRotationYchange;
+
+        protected virtual void OnPacket_CA_change(JoystickPacket_CAEventArgs e)
+        {
+            EventHandler<JoystickPacket_CAEventArgs> handler = Packet_CA_change;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+
+        public event EventHandler<JoystickPacket_CAEventArgs> Packet_CA_change;
     }
 
     //public static class EventHandlerExtensions
@@ -195,6 +235,10 @@ namespace TestMAP
     {
         public int Value { get; set; }
 //        public DateTime TimeStamp { get; set; }
+    }
+    public class JoystickPacket_CAEventArgs : EventArgs
+    {
+        public Packet_CA packet_CA { get; set; }
     }
     class DirectInputControllerOld
     {

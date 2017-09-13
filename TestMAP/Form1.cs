@@ -45,8 +45,9 @@ namespace TestMAP
         private Bunifu.Framework.UI.BunifuMetroTextbox ManualTextboxX;
         private TestMAP.DirectInputController DirectInputCntrl;
 
+        List<JoystickDescriptor> ListJoyDescriptor;
         private TestMAP.UDPClientClass UDPClient;
-        private TestMAP.ReceiveBytesData ReceiveData;
+        private TestMAP.ReceiveBytesData ReceiveData = new ReceiveBytesData();
 
         //Переменная отвечающая за состояние нажатия 
         //левой клавиши мыши.
@@ -80,8 +81,9 @@ namespace TestMAP
 
             this.DirectInputCntrl.JoystickXchange += JoystickX_change;
             this.DirectInputCntrl.JoystickYchange += JoystickY_change;
-            List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
-            DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
+            this.DirectInputCntrl.Packet_CA_change += JoystickPacket_CA_change;
+            //List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
+            //DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
 
             this.UDPClient = new UDPClientClass(50000);
             UDPClient.ReceiveData += UDPClient_ReceiveData;
@@ -854,6 +856,14 @@ namespace TestMAP
             //pictureBox1.Refresh();
             RefreshPicBox(pictureBox1);
         }
+        private void JoystickPacket_CA_change(object sender, JoystickPacket_CAEventArgs e)
+        {
+            Packet_CA packet_CA = e.packet_CA;
+            if (UDPClient != null)
+            {
+                UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClient.ipEndPoint_MUD);
+            }
+        }
 
         void UDPClient_ReceiveData(object sender, UDPClientClass.UdpClientEventArgs e)
         {
@@ -871,8 +881,6 @@ namespace TestMAP
   
         }
 
-        float[] x = { 100.78F, 50.12F, 200.99F };  // Массив х-кординат треугольника
-        float[] y = { 100.45F, 200.77F, 300.18F }; // Массив y-кординат треугольника
         int joyX = 32767;
         int joyY = 32767;
         private void pictureBox1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
@@ -1270,6 +1278,39 @@ namespace TestMAP
             }
 
             graphics.FillEllipse(pthGrBrush, rectEllipse);
+        }
+
+        private void bunifuTileButton1_Click(object sender, EventArgs e)
+        {
+            bunifuDropdown1.Clear();
+            ListJoyDescriptor = DirectInputCntrl.DetectDevices();
+            foreach (var Descriptor in ListJoyDescriptor)
+	        {
+                bunifuDropdown1.AddItem(Descriptor.DescriptorName);
+	        }
+            bunifuDropdown1.selectedIndex = 0;
+             
+        }
+
+        private void bunifuThinButton21_Click(object sender, EventArgs e)
+        {
+            if ( DirectInputCntrl.IsConnect() )
+            {
+                DirectInputCntrl.StopCapture();
+                bunifuThinButton21.ButtonText = "Подключиться";
+            }
+            else
+            {
+                if ( (ListJoyDescriptor != null) && (ListJoyDescriptor.Count > 0) && (bunifuDropdown1.selectedIndex >= 0) )
+                {
+                    DirectInputCntrl.StartCapture(ListJoyDescriptor[bunifuDropdown1.selectedIndex].DescriptorGuid);
+                }
+                if (DirectInputCntrl.IsConnect())
+                {
+                    bunifuThinButton21.ButtonText = "Отключить";
+                }
+            }
+
         }
 
 
