@@ -17,6 +17,8 @@ namespace TestMAP
 
         public IPEndPoint ipEndPoint_MUD = new IPEndPoint(IPAddress.Parse("127.0.0.1"),50001);
 
+        public bool IsConnect() { return !stop; }
+
         public UDPClientClass(int port)
         {
             ipEndPoint = new IPEndPoint(IPAddress.Any, port);
@@ -24,22 +26,43 @@ namespace TestMAP
 
         public void Send(byte[] Data, int Size, IPEndPoint endPoint)
         {
-            if (client != null )
+            try
             {
-                client.Send(Data, Size, endPoint);
+                if (client != null)
+                {
+                    client.Send(Data, Size, endPoint);
+                }
             }
+            catch (Exception SendExc)
+            {
+                LogError.MessageError(SendExc, null, "UDP соединение",true);
+            }
+            
         }
         public void StartReceiving()
         {
             StopReceiving();
-            stop = false;
-            if (client == null)
+
+            try
             {
-                client = new UdpClient(ipEndPoint);
-                if (client != null)
+                stop = false;
+                if (client == null)
                 {
-                    Receive(); // initial start of our "loop"
+                    client = new UdpClient(ipEndPoint);
+                    
+                    if (client != null)
+                    {
+                        Receive(); // initial start of our "loop"
+                    }
                 }
+            }
+            catch (Exception StartReceivingExc)
+            {
+                string Message = null;
+                if (StartReceivingExc.HResult == -2147467259)
+                    Message = "Выбранный порт: " + ipEndPoint.Port.ToString() + " занят";
+
+                LogError.MessageError(StartReceivingExc, Message, "UDP соединение", true);
             }
         }
 
@@ -61,33 +84,58 @@ namespace TestMAP
 
         public void StopReceiving()
         {
-            stop = true;
-            if (client != null)
+            try
             {
-                client.Client.Close();
-                client = null;
-            }   
+                stop = true;
+                if (client != null)
+                {
+                    client.Client.Close();
+                    client = null;
+                }  
+            }
+            catch (Exception StopReceivingExc)
+            {
+                LogError.MessageError(StopReceivingExc, null, "UDP соединение", true);
+            }
+ 
         }
 
         private void Receive()
         {
-            client.BeginReceive(new AsyncCallback(MyReceiveCallback), null);
+            try
+            {
+                client.BeginReceive(new AsyncCallback(MyReceiveCallback), null);
+            }
+            catch (Exception ReceiveExc)
+            {
+                LogError.MessageError(ReceiveExc, null, "UDP соединение", true);
+            }
+            
         }
 
         private void MyReceiveCallback(IAsyncResult result)
         {
-            IPEndPoint ip = new IPEndPoint(IPAddress.Any, 0);
-
-            UdpClientEventArgs clientArgs = new UdpClientEventArgs();
-            clientArgs.Data = client.EndReceive(result, ref ip);
-            clientArgs.Size = clientArgs.Data.Length;
-            clientArgs.endPoint = ip;
-            OnReceiveData(clientArgs);
-
-            if (!stop)
+            try
             {
-                Receive(); // <-- this will be our loop
+                IPEndPoint ip = new IPEndPoint(IPAddress.Any, 0);
+
+                UdpClientEventArgs clientArgs = new UdpClientEventArgs();
+                clientArgs.Data = client.EndReceive(result, ref ip);
+                clientArgs.Size = clientArgs.Data.Length;
+                clientArgs.endPoint = ip;
+                OnReceiveData(clientArgs);
+
+                if (!stop)
+                {
+                    Receive(); // <-- this will be our loop
+                }
             }
+            catch (Exception MyReceiveCallbackExc)
+            {
+                StopReceiving();
+                LogError.MessageError(MyReceiveCallbackExc, null, "UDP соединение", true);
+            }
+            
         }
 
         protected virtual void OnReceiveData(UdpClientEventArgs e)

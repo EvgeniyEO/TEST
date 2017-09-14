@@ -116,6 +116,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="GMapMarkerImage.cs" />
+    <Compile Include="LogError.cs" />
     <Compile Include="Markers.cs" />
     <Compile Include="OpenSeaMap.cs" />
     <Compile Include="Program.cs" />

@@ -365,7 +365,6 @@ namespace TestMAP
                 }
             }
         }
-
         void mapControl_MouseUp(object sender, MouseEventArgs e)
         {
             //Выполняем проверку, какая клавиша мыши была отпущена,
@@ -377,7 +376,6 @@ namespace TestMAP
                 //gMapControl1.UpdateRouteLocalPosition(routes); 
             }
         }
-
         int AddMarkerToEnd(int x, int y, bool inMission)
         {
             // Индекс добавленного маркера
@@ -398,7 +396,6 @@ namespace TestMAP
 
             return retIndex;
         }
-
         void AddMarkerByIndex(long x, long y, int Index, bool inMission)
         {
             PointLatLng point = gMapControl1.FromLocalToLatLng((int)x, (int)y);
@@ -412,7 +409,6 @@ namespace TestMAP
             // Обновляем карту для перерисовки
             gMapControl1.UpdateRouteLocalPosition(routes);
         }
-
         void DropMarkerByIndex( int Index )
         {
             routes.Points.RemoveAt(Index);
@@ -426,14 +422,12 @@ namespace TestMAP
                 markersOverlay.Markers[i].ToolTipText = i.ToString();
             }
         }
-
         void switchChekedMarker(int Index, bool inMission)
         {
             GPoint pnt = gMapControl1.FromLatLngToLocal(markersOverlay.Markers[Index].Position);
             DropMarkerByIndex(Index);
             AddMarkerByIndex(pnt.X, pnt.Y, Index, inMission);
         }
-
         private void Method1(object sender, EventArgs e)
         {
             int index = AddMarkerToEnd(CurrentMenuPoint.X, CurrentMenuPoint.Y, true);
@@ -466,7 +460,6 @@ namespace TestMAP
                 }
             }
         }
-
         private void Method3(object sender, EventArgs e)
         {
             //routes.Points.RemoveAll(x => !x.IsZero);
@@ -481,7 +474,6 @@ namespace TestMAP
             bunifuGridWayPoint.Rows.Clear();
 
         }
-
         void mapControl_MouseDown(object sender, MouseEventArgs e)
         {
             ContextMenu rightClickMenuStrip = new ContextMenu();
@@ -529,7 +521,6 @@ namespace TestMAP
                     break;
             }
         }
-
         //Убираем квадрат выделения маркера
         //если нет действий с маркером.
         void mapControl_OnMarkerLeave(GMapMarker item)
@@ -559,11 +550,9 @@ namespace TestMAP
                 currentMarker.ToolTipText = string.Format(StrFormatLatLng, currentMarker.Position.Lat, currentMarker.Position.Lng);
             }
         }
-
         void mapControl_OnMarkerClick(GMapMarker item, MouseEventArgs e)
         {
         }
-
         void mapControl_MouseClick(object sender, MouseEventArgs e)
         {
             ////Выполняем проверку, какая клавиша мыши была нажата,
@@ -609,7 +598,6 @@ namespace TestMAP
         void mapControl_OnMapZoomChanged()
         {
         }
-
         //Запускаем таймер при наведении на маркер
         //private void buttonBeginBlink_Click(object sender, EventArgs e)
         //{
@@ -666,7 +654,6 @@ namespace TestMAP
         //    //Перерисовываем карту.
         //    gMapControl1.Refresh();
         //}
-
         private void Form1_Resize(object sender, EventArgs e)
         {
             try
@@ -703,10 +690,10 @@ namespace TestMAP
                 }
 
             }
-            catch (Exception e1)
+            catch (Exception Form1_ResizeExc)
             {
-
-                MessageBox.Show(e1.Message + " / " + e1.HelpLink + " / " + e1.Source + " / " + e1.TargetSite + " / " + e1.Data);
+                LogError.MessageError(Form1_ResizeExc, null, "События отображения формы", true);
+                //MessageBox.Show(e1.Message + " / " + e1.HelpLink + " / " + e1.Source + " / " + e1.TargetSite + " / " + e1.Data);
             }
 
 
@@ -733,7 +720,6 @@ namespace TestMAP
 
             }
         }
-
         private void bunifuCustomDataGrid1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == ColInMission.Index && e.RowIndex != -1)
@@ -748,7 +734,6 @@ namespace TestMAP
                 }
             }
         }
-
         private void bunifuCustomDataGrid1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == ColInMission.Index && e.RowIndex != -1)
@@ -756,7 +741,6 @@ namespace TestMAP
                 bunifuGridWayPoint.CommitEdit(DataGridViewDataErrorContexts.Commit);
             }
         }
-
         private void MenuButton_Click(object sender, EventArgs e)
         {
             if (panelMenuGradient.Size.Width == 60)
@@ -783,7 +767,6 @@ namespace TestMAP
                 
             }  
         }
-
         private void FlatButtonMapWay_Click(object sender, EventArgs e)
         {
             //panelMapWay.Visible = true;
@@ -792,14 +775,12 @@ namespace TestMAP
 
             animatorPanelMapWay.ShowSync(panelMapWay);
         }
-
         private void FlatButtonSettings_Click(object sender, EventArgs e)
         {
             panelSettings.Visible = true;
             panelMapWay.Visible = false;
             panelManual.Visible = false;
         }
-
         private void FlatButtonManual_Click(object sender, EventArgs e)
         {
             panelManual.Visible = true;
@@ -808,7 +789,6 @@ namespace TestMAP
             pictureBox1.Refresh();
         }
         delegate void SetTextBoxCallback(string text, Control TextBox);
-
         private void SetTextBox(string text, Control TextBox)
         {
             // InvokeRequired required compares the thread ID of the
@@ -840,7 +820,6 @@ namespace TestMAP
                 PicBox.Refresh();
             }
         }
-
         private void JoystickX_change(object sender, JoystickButtonPressedEventArgs e)  
         {
             SetTextBox(e.Value.ToString(), ManualTextboxX);
@@ -848,7 +827,6 @@ namespace TestMAP
             //pictureBox1.Refresh();
             RefreshPicBox(pictureBox1);
         }
-
         private void JoystickY_change(object sender, JoystickButtonPressedEventArgs e)
         {
             //SetTextBox(e.Value.ToString(), ManualTextboxX);
@@ -1310,7 +1288,23 @@ namespace TestMAP
                     bunifuThinButton21.ButtonText = "Отключить";
                 }
             }
+        }
 
+        private void bunifuThinButton22_Click(object sender, EventArgs e)
+        {
+            if (UDPClient.IsConnect())
+            {
+                UDPClient.StopReceiving();
+                bunifuThinButton22.ButtonText = "Подключиться";
+            }
+            else
+            {
+                UDPClient.StartReceiving();
+                if (DirectInputCntrl.IsConnect())
+                {
+                    bunifuThinButton21.ButtonText = "Отключить";
+                }
+            }
         }
 
 
