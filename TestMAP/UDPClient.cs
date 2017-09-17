@@ -117,14 +117,17 @@ namespace TestMAP
         {
             try
             {
-                IPEndPoint ip = new IPEndPoint(IPAddress.Any, 0);
+                if (client != null)
+                {
+                    IPEndPoint ip = new IPEndPoint(IPAddress.Any, 0);
 
-                UdpClientEventArgs clientArgs = new UdpClientEventArgs();
-                clientArgs.Data = client.EndReceive(result, ref ip);
-                clientArgs.Size = clientArgs.Data.Length;
-                clientArgs.endPoint = ip;
-                OnReceiveData(clientArgs);
-
+                    UdpClientEventArgs clientArgs = new UdpClientEventArgs();
+                    clientArgs.Data = client.EndReceive(result, ref ip);
+                    clientArgs.Size = clientArgs.Data.Length;
+                    clientArgs.endPoint = ip;
+                    OnReceiveData(clientArgs);
+                }
+                
                 if (!stop)
                 {
                     Receive(); // <-- this will be our loop

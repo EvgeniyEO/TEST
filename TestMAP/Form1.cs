@@ -64,6 +64,12 @@ namespace TestMAP
         {
             InitializeComponent();
             MyInitializeComponent();
+            initDefaultSettings();
+        }
+
+        public void initDefaultSettings()
+        {
+            bunifuCheckbox1.Checked = Properties.Settings.Default.SettingUdpAutoConnect;
         }
         private void MyInitializeComponent()
         {
@@ -1300,11 +1306,17 @@ namespace TestMAP
             else
             {
                 UDPClient.StartReceiving();
-                if (DirectInputCntrl.IsConnect())
+                if (UDPClient.IsConnect())
                 {
-                    bunifuThinButton21.ButtonText = "Отключить";
+                    bunifuThinButton22.ButtonText = "Отключить";
                 }
             }
+        }
+
+        private void bunifuCheckbox1_OnChange(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.SettingUdpAutoConnect = bunifuCheckbox1.Checked;
+            Properties.Settings.Default.Save();
         }
 
 
