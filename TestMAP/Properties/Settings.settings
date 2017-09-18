@@ -5,5 +5,14 @@
     <Setting Name="SettingUdpAutoConnect" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="SettingJoyAutoConnect" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SettingJoyStringConnect" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="SettingUdpPort" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">50000</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

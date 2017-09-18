@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Drawing.Drawing2D;
+using TestMAP.Properties;
 
 namespace TestMAP
 {
@@ -45,8 +46,8 @@ namespace TestMAP
         private Bunifu.Framework.UI.BunifuMetroTextbox ManualTextboxX;
         private TestMAP.DirectInputController DirectInputCntrl;
 
-        List<JoystickDescriptor> ListJoyDescriptor;
-        private TestMAP.UDPClientClass UDPClient;
+        List<JoystickDescriptor> ListJoyDescriptor = null;
+        private TestMAP.UDPClientClass UDPClient = null;
         private TestMAP.ReceiveBytesData ReceiveData = new ReceiveBytesData();
 
         //Переменная отвечающая за состояние нажатия 
@@ -66,10 +67,55 @@ namespace TestMAP
             MyInitializeComponent();
             initDefaultSettings();
         }
-
         public void initDefaultSettings()
         {
-            bunifuCheckbox1.Checked = Properties.Settings.Default.SettingUdpAutoConnect;
+            // Joustic -----------------------------------------------------
+            bunifuCheckbox2.Checked = Settings.Default.SettingJoyAutoConnect;
+
+            if (Settings.Default.SettingJoyAutoConnect && !string.IsNullOrEmpty(Settings.Default.SettingJoyStringConnect))
+            {
+                try
+                {
+                    if ( DirectInputCntrl != null && !(DirectInputCntrl.IsConnect()) )
+                    {
+                        int index = -1;
+                        bunifuDropdown1.Clear();
+                        ListJoyDescriptor = DirectInputCntrl.DetectDevices();
+                        if ( ListJoyDescriptor != null )
+                        {
+                            foreach (var Descriptor in ListJoyDescriptor)
+                            {
+                                bunifuDropdown1.AddItem(Descriptor.DescriptorName);
+                                if (string.Equals(Descriptor.DescriptorName, Settings.Default.SettingJoyStringConnect))
+                                    index = ListJoyDescriptor.IndexOf(Descriptor);
+                                if (index >= 0)
+                                {
+                                    DirectInputCntrl.StartCapture(ListJoyDescriptor[index].DescriptorGuid);
+                                    bunifuDropdown1.selectedIndex = index;
+                                }
+                            }
+                            bunifuDropdown1.selectedIndex = 0;
+                            bunifuThinButton21.ButtonText = "Отключить";
+                        }
+                    }
+                    else
+                    {
+                        bunifuTileButton1_Click(this, new EventArgs());
+                        bunifuThinButton21.ButtonText = "Подключиться";
+                    }
+                }
+                catch (Exception initDefaultSettingsJoyExc)
+                {
+                    LogError.MessageError(initDefaultSettingsJoyExc, null, "Joustic initialization section", true);
+                }
+            }
+            else
+            {
+                bunifuTileButton1_Click(this, new EventArgs());
+                bunifuThinButton21.ButtonText = "Подключиться";
+            }
+            // UDP Connect -------------------------------------------------
+            bunifuCheckbox1.Checked = Settings.Default.SettingUdpAutoConnect;
         }
         private void MyInitializeComponent()
         {
@@ -94,7 +140,7 @@ namespace TestMAP
             this.UDPClient = new UDPClientClass(50000);
             UDPClient.ReceiveData += UDPClient_ReceiveData;
             UDPClient.StartReceiving();
-
+            maskedTextBox1.ValidatingType = typeof(System.Net.IPAddress);
 
             this.ManualTextboxX = new Bunifu.Framework.UI.BunifuMetroTextbox();
             this.panelManual.Controls.Add(this.ManualTextboxX);
@@ -845,16 +891,12 @@ namespace TestMAP
             Packet_CA packet_CA = e.packet_CA;
             if (UDPClient != null)
             {
-                UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClient.ipEndPoint_MUD);
+                UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_MUD);
             }
         }
 
         void UDPClient_ReceiveData(object sender, UDPClientClass.UdpClientEventArgs e)
         {
-            //var data = Data1.FromBytes(e.Data);
-            //var data = Data.FromBytes(e.Data);
-            //SetTextBox(Encoding.ASCII.GetString(e.Data), bunifuMetroTextbox1);
-
             ReceiveData = new ReceiveBytesData(e.Data);
             SetTextBox(ReceiveData.packet_AB.rms_N3.ToString(), ManualTextboxX);
             if (sender is UDPClientClass)
@@ -862,7 +904,6 @@ namespace TestMAP
                 UDPClientClass client = sender as UDPClientClass;
                 client.Send(ReceiveData.getBytesToSendPacketCA(), ReceiveData.getLenToSendPacketCA(), e.endPoint);
             }
-  
         }
 
         int joyX = 32767;
@@ -1291,6 +1332,13 @@ namespace TestMAP
                 }
                 if (DirectInputCntrl.IsConnect())
                 {
+                    // Если отмечено автоподключение, то сохраняем название устройства
+                    if (bunifuCheckbox2.Checked)
+                    {
+                        Settings.Default.SettingJoyStringConnect = ListJoyDescriptor[bunifuDropdown1.selectedIndex].DescriptorName;
+                        Settings.Default.Save();
+                    }
+                    
                     bunifuThinButton21.ButtonText = "Отключить";
                 }
             }
@@ -1315,8 +1363,19 @@ namespace TestMAP
 
         private void bunifuCheckbox1_OnChange(object sender, EventArgs e)
         {
-            Properties.Settings.Default.SettingUdpAutoConnect = bunifuCheckbox1.Checked;
-            Properties.Settings.Default.Save();
+            Settings.Default.SettingUdpAutoConnect = bunifuCheckbox1.Checked;
+            Settings.Default.Save();
+        }
+
+        private void bunifuCheckbox2_OnChange(object sender, EventArgs e)
+        {
+            Settings.Default.SettingJoyAutoConnect = bunifuCheckbox2.Checked;
+            // Сохраняем название выбранного устройства для автоподключения при запуске приложения
+            if (DirectInputCntrl.IsConnect() && bunifuCheckbox2.Checked)
+            {
+                Settings.Default.SettingJoyStringConnect = bunifuDropdown1.Items.GetValue(bunifuDropdown1.selectedIndex).ToString();
+            }
+            Settings.Default.Save();
         }
 
 

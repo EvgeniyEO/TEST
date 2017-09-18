@@ -34,5 +34,41 @@ namespace TestMAP.Properties {
                 this["SettingUdpAutoConnect"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SettingJoyAutoConnect {
+            get {
+                return ((bool)(this["SettingJoyAutoConnect"]));
+            }
+            set {
+                this["SettingJoyAutoConnect"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SettingJoyStringConnect {
+            get {
+                return ((string)(this["SettingJoyStringConnect"]));
+            }
+            set {
+                this["SettingJoyStringConnect"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("50000")]
+        public uint SettingUdpPort {
+            get {
+                return ((uint)(this["SettingUdpPort"]));
+            }
+            set {
+                this["SettingUdpPort"] = value;
+            }
+        }
     }
 }

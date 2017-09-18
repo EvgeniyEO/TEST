@@ -15,7 +15,8 @@ namespace TestMAP
         bool stop;
         IPEndPoint ipEndPoint;
 
-        public IPEndPoint ipEndPoint_MUD = new IPEndPoint(IPAddress.Parse("127.0.0.1"),50001);
+        static public IPEndPoint ipEndPoint_MUD = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 50001);
+        static public IPEndPoint ipEndPoint_NAV = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 50002);
 
         public bool IsConnect() { return !stop; }
 
@@ -135,6 +136,12 @@ namespace TestMAP
             }
             catch (Exception MyReceiveCallbackExc)
             {
+                // Удаленный хост принудительно разорвал существующее подключение
+                if (MyReceiveCallbackExc.HResult == -2147467259)
+                {
+                    LogError.MessageError(MyReceiveCallbackExc, null, "UDP соединение", false);
+                    return;
+                }
                 StopReceiving();
                 LogError.MessageError(MyReceiveCallbackExc, null, "UDP соединение", true);
             }
