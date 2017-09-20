@@ -12,7 +12,7 @@ namespace TestMAP
     class UDPClientClass
     {
         UdpClient client = null;
-        bool stop;
+        bool stop = true;
         IPEndPoint ipEndPoint;
 
         static public IPEndPoint ipEndPoint_MUD = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 50001);
@@ -46,13 +46,13 @@ namespace TestMAP
 
             try
             {
-                stop = false;
                 if (client == null)
                 {
                     client = new UdpClient(ipEndPoint);
                     
                     if (client != null)
                     {
+                        stop = false;
                         Receive(); // initial start of our "loop"
                     }
                 }
@@ -70,17 +70,30 @@ namespace TestMAP
         public void StartReceiving(int port)
         {
             StopReceiving();
-            stop = false;
-            ipEndPoint = new IPEndPoint(IPAddress.Any, port);
 
-            if (client == null)
+            try
             {
-                client = new UdpClient(ipEndPoint);
-                if (client != null)
+                stop = false;
+                ipEndPoint = new IPEndPoint(IPAddress.Any, port);
+                if (client == null)
                 {
-                    Receive(); // initial start of our "loop"
+                    client = new UdpClient(ipEndPoint);
+
+                    if (client != null)
+                    {
+                        stop = false; 
+                        Receive(); // initial start of our "loop"
+                    }
                 }
-            }  
+            }
+            catch (Exception StartReceivingExc)
+            {
+                string Message = null;
+                if (StartReceivingExc.HResult == -2147467259)
+                    Message = "Выбранный порт: " + ipEndPoint.Port.ToString() + " занят";
+
+                LogError.MessageError(StartReceivingExc, Message, "UDP соединение", true);
+            }
         }
 
         public void StopReceiving()

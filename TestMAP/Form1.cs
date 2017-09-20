@@ -18,6 +18,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Drawing.Drawing2D;
 using TestMAP.Properties;
+using System.Text.RegularExpressions;
+using System.Net;
 
 namespace TestMAP
 {
@@ -116,6 +118,34 @@ namespace TestMAP
             }
             // UDP Connect -------------------------------------------------
             bunifuCheckbox1.Checked = Settings.Default.SettingUdpAutoConnect;
+            if (!string.IsNullOrEmpty(Settings.Default.SettingUdpPort))
+                maskedTextBox3.Text = Settings.Default.SettingUdpPort;
+            if (!string.IsNullOrEmpty(Settings.Default.SettingAddressMud))
+            {
+                maskedTextBox1.Text = Settings.Default.SettingAddressMud;
+                UDPClientClass.ipEndPoint_MUD = new System.Net.IPEndPoint(
+                    IPAddress.Parse(Settings.Default.SettingAddressMud.Substring(0, 15)), 
+                    Convert.ToInt32(Settings.Default.SettingAddressMud.Substring(16, 5))
+                    );
+            }
+                
+            if (!string.IsNullOrEmpty(Settings.Default.SettingAddressNav))
+            {
+                maskedTextBox2.Text = Settings.Default.SettingAddressNav;
+                UDPClientClass.ipEndPoint_NAV = new System.Net.IPEndPoint(
+                    IPAddress.Parse(Settings.Default.SettingAddressNav.Substring(0, 15)),
+                    Convert.ToInt32(Settings.Default.SettingAddressNav.Substring(16, 5))
+                    );
+            }
+                
+            if (UDPClient!=null && Settings.Default.SettingUdpAutoConnect && !string.IsNullOrEmpty(Settings.Default.SettingUdpPort))
+            {
+                UDPClient.StartReceiving(Convert.ToInt32(Settings.Default.SettingUdpPort));
+                if (UDPClient.IsConnect())
+                {
+                    bunifuThinButton22.ButtonText = "Отключить";
+                }
+            }
         }
         private void MyInitializeComponent()
         {
@@ -139,8 +169,7 @@ namespace TestMAP
 
             this.UDPClient = new UDPClientClass(50000);
             UDPClient.ReceiveData += UDPClient_ReceiveData;
-            UDPClient.StartReceiving();
-            maskedTextBox1.ValidatingType = typeof(System.Net.IPAddress);
+            //UDPClient.StartReceiving();
 
             this.ManualTextboxX = new Bunifu.Framework.UI.BunifuMetroTextbox();
             this.panelManual.Controls.Add(this.ManualTextboxX);
@@ -1356,6 +1385,12 @@ namespace TestMAP
                 UDPClient.StartReceiving();
                 if (UDPClient.IsConnect())
                 {
+                    // Если отмечено автоподключение, то сохраняем название устройства
+                    if (bunifuCheckbox1.Checked)
+                    {
+                        Settings.Default.SettingUdpPort = maskedTextBox3.Lines[0];
+                        Settings.Default.Save();
+                    }
                     bunifuThinButton22.ButtonText = "Отключить";
                 }
             }
@@ -1376,6 +1411,74 @@ namespace TestMAP
                 Settings.Default.SettingJoyStringConnect = bunifuDropdown1.Items.GetValue(bunifuDropdown1.selectedIndex).ToString();
             }
             Settings.Default.Save();
+        }
+
+        private char isCharToIP(object sender,KeyPressEventArgs e)
+        {
+            char ret = e.KeyChar;
+
+            MaskedTextBox maskText = null;
+            if (sender is MaskedTextBox)
+                maskText = sender as MaskedTextBox;
+            if (maskText!=null)
+            {
+                var indexer = maskText.SelectionStart;
+                if (maskText.SelectionStart < 15)
+                {
+                    if (indexer == 3 || indexer == 7 || indexer == 11)
+                    {
+                        indexer++;
+                    }
+                    Regex regIP = new Regex(@"\b(([01]?\d?\d|2[0-4]\d|25[0-5])\.){3}([01]?\d?\d|2[0-4]\d|25[0-5])\b");
+                    char[] chars = maskText.Lines[0].Substring(0, 15).ToCharArray();
+                    chars[indexer] = e.KeyChar;
+                    string tmp = new string(chars);
+                    if (!regIP.IsMatch(tmp))
+                    {
+                        ret = '0';
+                    }
+                }
+            }
+            
+            return ret;
+        }
+
+        private void maskedTextBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.KeyChar = isCharToIP(sender, e);
+        }
+
+        private void maskedTextBox2_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.KeyChar = isCharToIP(sender, e);
+        }
+
+        private void TileButtonSaveMud_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(maskedTextBox1.Text))
+            {
+                Settings.Default.SettingAddressMud = maskedTextBox1.Lines[0];
+                Settings.Default.Save();
+                
+                UDPClientClass.ipEndPoint_MUD = new System.Net.IPEndPoint(
+                    IPAddress.Parse(Settings.Default.SettingAddressMud.Substring(0, 15)),
+                    Convert.ToInt32(Settings.Default.SettingAddressMud.Substring(16, 5))
+                    );
+            }  
+        }
+
+        private void TileButtonSaveNav_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(maskedTextBox2.Text))
+            {
+                Settings.Default.SettingAddressNav = maskedTextBox2.Lines[0];
+                Settings.Default.Save();
+
+                UDPClientClass.ipEndPoint_NAV = new System.Net.IPEndPoint(
+                    IPAddress.Parse(Settings.Default.SettingAddressNav.Substring(0, 15)),
+                    Convert.ToInt32(Settings.Default.SettingAddressNav.Substring(16, 5))
+                    );
+            }  
         }
 
 

@@ -11,8 +11,14 @@
     <Setting Name="SettingJoyStringConnect" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="SettingUdpPort" Type="System.UInt32" Scope="User">
+    <Setting Name="SettingUdpPort" Type="System.String" Scope="User">
       <Value Profile="(Default)">50000</Value>
+    </Setting>
+    <Setting Name="SettingAddressMud" Type="System.String" Scope="User">
+      <Value Profile="(Default)">127.000.000.001:50001</Value>
+    </Setting>
+    <Setting Name="SettingAddressNav" Type="System.String" Scope="User">
+      <Value Profile="(Default)">127.000.000.001:50002</Value>
     </Setting>
   </Settings>
 </SettingsFile>

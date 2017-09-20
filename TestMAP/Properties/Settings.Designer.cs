@@ -62,12 +62,36 @@ namespace TestMAP.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("50000")]
-        public uint SettingUdpPort {
+        public string SettingUdpPort {
             get {
-                return ((uint)(this["SettingUdpPort"]));
+                return ((string)(this["SettingUdpPort"]));
             }
             set {
                 this["SettingUdpPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.000.000.001:50001")]
+        public string SettingAddressMud {
+            get {
+                return ((string)(this["SettingAddressMud"]));
+            }
+            set {
+                this["SettingAddressMud"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("127.000.000.001:50002")]
+        public string SettingAddressNav {
+            get {
+                return ((string)(this["SettingAddressNav"]));
+            }
+            set {
+                this["SettingAddressNav"] = value;
             }
         }
     }
