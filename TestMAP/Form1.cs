@@ -33,7 +33,7 @@ namespace TestMAP
         private TestMAP.MaskedEditColumn ColDown;
         private TestMAP.MyDGVCheckBoxColumn ColDownMode;
         private TestMAP.MaskedEditColumn ColSpeed;
-        private System.Windows.Forms.Panel panelSettings;
+        //private System.Windows.Forms.Panel panelSettings;
         private System.Windows.Forms.Panel panelManual;
         //Переменная нового класса,
         //для замены стандартного маркера.
@@ -157,7 +157,7 @@ namespace TestMAP
             this.ColDown = new TestMAP.MaskedEditColumn();
             this.ColDownMode = new TestMAP.MyDGVCheckBoxColumn();
             this.ColSpeed = new TestMAP.MaskedEditColumn();
-            this.panelSettings = new System.Windows.Forms.Panel();
+            //this.panelSettings = new System.Windows.Forms.Panel();
             this.panelManual = new System.Windows.Forms.Panel();
             this.DirectInputCntrl = new DirectInputController();
 
@@ -171,41 +171,41 @@ namespace TestMAP
             UDPClient.ReceiveData += UDPClient_ReceiveData;
             //UDPClient.StartReceiving();
 
-            this.ManualTextboxX = new Bunifu.Framework.UI.BunifuMetroTextbox();
-            this.panelManual.Controls.Add(this.ManualTextboxX);
+            //this.ManualTextboxX = new Bunifu.Framework.UI.BunifuMetroTextbox();
+            //this.panelManual.Controls.Add(this.ManualTextboxX);
 
 
-            // 
-            // ManualTextboxX
-            // 
-            //this.ManualTextboxX.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("bunifuTextbox1.BackgroundImage")));
-            //this.ManualTextboxX.Icon = null;
-            this.ManualTextboxX.BackColor = System.Drawing.Color.Silver;
-            this.ManualTextboxX.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ManualTextboxX.ForeColor = System.Drawing.Color.SeaGreen;
-            this.ManualTextboxX.Location = new System.Drawing.Point(39, 449);
-            this.ManualTextboxX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.ManualTextboxX.Name = "ManualTextboxX";
-            this.ManualTextboxX.Size = new System.Drawing.Size(195, 114);
-            this.ManualTextboxX.TabIndex = 4;
-            this.ManualTextboxX.Text = "ManualTextboxX";
-            this.ManualTextboxX.Visible = true;
+            //// 
+            //// ManualTextboxX
+            //// 
+            ////this.ManualTextboxX.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("bunifuTextbox1.BackgroundImage")));
+            ////this.ManualTextboxX.Icon = null;
+            //this.ManualTextboxX.BackColor = System.Drawing.Color.Silver;
+            //this.ManualTextboxX.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            //this.ManualTextboxX.ForeColor = System.Drawing.Color.SeaGreen;
+            //this.ManualTextboxX.Location = new System.Drawing.Point(39, 449);
+            //this.ManualTextboxX.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            //this.ManualTextboxX.Name = "ManualTextboxX";
+            //this.ManualTextboxX.Size = new System.Drawing.Size(195, 114);
+            //this.ManualTextboxX.TabIndex = 4;
+            //this.ManualTextboxX.Text = "ManualTextboxX";
+            //this.ManualTextboxX.Visible = true;
             
             // 
             // panelSettings
             // 
-            this.panelSettings.SuspendLayout();
-            this.Controls.Add(this.panelSettings);
-            this.panelSettings.ResumeLayout(false);
+            //this.panelSettings.SuspendLayout();
+            //this.Controls.Add(this.panelSettings);
+            //this.panelSettings.ResumeLayout(false);
 
-            this.panelSettings.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            //this.panelMapWay.Controls.Add(this.panelTab);
-            //this.panelMapWay.Controls.Add(this.panelMap);
-            //this.animatorPanelGradient.SetDecoration(this.panelSettings, BunifuAnimatorNS.DecorationType.None);
-            this.panelSettings.Location = new System.Drawing.Point(310, 30);
-            this.panelSettings.Name = "panelSettings";
-            this.panelSettings.Size = new System.Drawing.Size(1517, 880);
-            this.panelSettings.TabIndex = 10;
+            //this.panelSettings.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            ////this.panelMapWay.Controls.Add(this.panelTab);
+            ////this.panelMapWay.Controls.Add(this.panelMap);
+            ////this.animatorPanelGradient.SetDecoration(this.panelSettings, BunifuAnimatorNS.DecorationType.None);
+            //this.panelSettings.Location = new System.Drawing.Point(310, 30);
+            //this.panelSettings.Name = "panelSettings";
+            //this.panelSettings.Size = new System.Drawing.Size(1517, 880);
+            //this.panelSettings.TabIndex = 10;
 
             // 
             // panelManual
@@ -281,7 +281,7 @@ namespace TestMAP
 
             panelMenuGradient.Width = 280;
             FlatButtonMapWay.Width = 280;
-            FlatButtonManual.Width = 280;
+            FlatButtonControl.Width = 280;
             FlatButtonSettings.Width = 280;
 
             pictureBox1.BackColor = Color.White;
@@ -828,23 +828,30 @@ namespace TestMAP
             {
                 panelMenuGradient.Width = 280;
                 Form1_Resize(this, e);
-                panelMenuGradient.Visible = false;
                 FlatButtonMapWay.Text = "              Map and Waypoint";
-                FlatButtonManual.Text = "              Manual";
+                FlatButtonControl.Text = "              Manual";
                 FlatButtonSettings.Text = "              Settings";
+                // Для анимации боковой панели
+                /*
+                panelMenuGradient.Visible = false;
                 animatorPanelGradient.ShowSync(panelMenuGradient);
-                
+                */
 
             }
             else
             {
                 panelMenuGradient.Width = 60;
                 Form1_Resize(this, e);
-                panelMenuGradient.Visible = false;
                 FlatButtonMapWay.Text = "";
-                FlatButtonManual.Text = "";
+                FlatButtonControl.Text = "";
                 FlatButtonSettings.Text = "";
+                // Для анимации боковой панели
+                /*
+                panelMenuGradient.Visible = false;
                 animatorPanelGradient.ShowSync(panelMenuGradient);
+                 */
+                // Сворачиваем меню управления
+                FlatButtonManual.Visible = false;
                 
             }  
         }
@@ -862,12 +869,13 @@ namespace TestMAP
             panelMapWay.Visible = false;
             panelManual.Visible = false;
         }
-        private void FlatButtonManual_Click(object sender, EventArgs e)
+        private void FlatButtonControl_Click(object sender, EventArgs e)
         {
-            panelManual.Visible = true;
-            panelSettings.Visible = false;
-            panelMapWay.Visible = false;
-            pictureBox1.Refresh();
+            FlatButtonManual.Visible = !FlatButtonManual.Visible;
+            if (FlatButtonManual.Visible && panelMenuGradient.Size.Width == 60)
+            {
+                MenuButton_Click(sender, e);
+            }
         }
         delegate void SetTextBoxCallback(string text, Control TextBox);
         private void SetTextBox(string text, Control TextBox)
@@ -1479,6 +1487,43 @@ namespace TestMAP
                     Convert.ToInt32(Settings.Default.SettingAddressNav.Substring(16, 5))
                     );
             }  
+        }
+
+        private void bunifuThinButton23_Click(object sender, EventArgs e)
+        {
+            FontDialog fontDialog1 = new FontDialog();
+
+            //if (fontDialog1.ShowDialog() == DialogResult.OK)
+            //{
+            //    FlatButtonSettings.TextFont = fontDialog1.Font;
+            //}
+
+            if (fontDialog1.ShowDialog() == DialogResult.OK)
+            {
+                bunifuTextbox1.Font = fontDialog1.Font;
+                bunifuTextbox1.ForeColor = fontDialog1.Color;
+
+                ChangeFont(this.panel3, fontDialog1.Font);
+            }
+        }
+        void ChangeFont(Control ctrl, Font font )
+        {
+            ctrl.Font = font;
+
+            foreach (Control inner in ctrl.Controls)
+            {
+                if (inner is Panel)
+                    ChangeFont(inner, font);
+            }
+                
+        }
+
+        private void FlatButtonManual_Click(object sender, EventArgs e)
+        {
+            panelManual.Visible = true;
+            panelSettings.Visible = false;
+            panelMapWay.Visible = false;
+            pictureBox1.Refresh();
         }
 
 
