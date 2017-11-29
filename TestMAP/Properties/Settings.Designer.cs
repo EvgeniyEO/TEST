@@ -94,5 +94,53 @@ namespace TestMAP.Properties {
                 this["SettingAddressNav"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.127.254:04001")]
+        public string SettingAddressPwm1 {
+            get {
+                return ((string)(this["SettingAddressPwm1"]));
+            }
+            set {
+                this["SettingAddressPwm1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.127.254:04002")]
+        public string SettingAddressPwm2 {
+            get {
+                return ((string)(this["SettingAddressPwm2"]));
+            }
+            set {
+                this["SettingAddressPwm2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.127.254:04003")]
+        public string SettingAddressPwm3 {
+            get {
+                return ((string)(this["SettingAddressPwm3"]));
+            }
+            set {
+                this["SettingAddressPwm3"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.127.254:04004")]
+        public string SettingAddressEngine {
+            get {
+                return ((string)(this["SettingAddressEngine"]));
+            }
+            set {
+                this["SettingAddressEngine"] = value;
+            }
+        }
     }
 }

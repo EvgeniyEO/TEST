@@ -7,9 +7,18 @@ using System.Threading.Tasks;
 using System.Drawing;
 using SharpDX.DirectInput;
 using SharpDX;
+using System.Windows.Forms;
+
 
 namespace TestMAP
 {
+    static class Errors
+    {
+        public const long SUCCESS = 0;
+        public const long ERROR = -1;
+
+    }
+
     class JoystickDescriptor
     {
         public Guid DescriptorGuid;
@@ -70,25 +79,37 @@ namespace TestMAP
             {
                 joystickDescriptors.Add(new JoystickDescriptor(deviceInstance.InstanceGuid, deviceInstance.InstanceName));
             }
-
+            
             return joystickDescriptors;
         }
 
-        public void StartCapture(Guid joystickGuid)
+        public long StartCapture(Guid joystickGuid)
         {
-            joystick = new Joystick(directInput, joystickGuid);
-            if ( joystick != null )
+            long result = Errors.ERROR;
+
+            if ( !directInput.IsDeviceAttached(joystickGuid) )
             {
-                joystick.Properties.BufferSize = 128;
-                joystick.Acquire();
-                
-                pollingThread = new Thread(new ThreadStart(PollJoystick));
-                if ( pollingThread != null)
+                MessageBox.Show("Джойстик не найден, обновите список!", "Джойстик", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            {
+                joystick = new Joystick(directInput, joystickGuid);
+                if (joystick != null)
                 {
-                    pollingThread.Start();
-                    Connect = true;
+                    joystick.Properties.BufferSize = 128;
+                    joystick.Acquire();
+
+                    pollingThread = new Thread(new ThreadStart(PollJoystick));
+                    if (pollingThread != null)
+                    {
+                        pollingThread.Start();
+                        Connect = true;
+                        result = Errors.SUCCESS;
+                    }
                 }
             }
+
+            return result;
         }
 
         public void StopCapture()
@@ -117,6 +138,12 @@ namespace TestMAP
         {
             while (!_QuitPolling)
             {
+                if ( !directInput.IsDeviceAttached(joystick.Information.InstanceGuid) )
+                {
+                    MessageBox.Show("Потеряна связь с джойстиком", "Джойстик", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    break;
+                }
+
                 joystick.Poll();
                 JoystickUpdate[] datas = joystick.GetBufferedData();
                 JoystickButtonPressedEventArgs args = new JoystickButtonPressedEventArgs();
@@ -127,22 +154,27 @@ namespace TestMAP
                     switch (state.Offset)
                     {
                         case JoystickOffset.RotationX:
+                            packet_CA.axis_X = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickRotationXchange(args);
                             break;
                         case JoystickOffset.RotationY:
+                            packet_CA.axis_Y = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickRotationYchange(args);
                             break;
                         case JoystickOffset.X:
-                            packet_CA.axis_X = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickXchange(args);
                             break;
                         case JoystickOffset.Y:
-                            packet_CA.axis_Y = (byte)(state.Value / 256);
+                            packet_CA.axis_Z = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickYchange(args);
+                            break;
+                        case JoystickOffset.Z:
+                            args.Value = state.Value;
+                            OnJoystickZchange(args);
                             break;
                         case JoystickOffset.Buttons0:
                             packet_CA.button1 = (state.Value > 0) ? (byte)1 : (byte)0;
@@ -186,6 +218,17 @@ namespace TestMAP
         }
 
         public event EventHandler<JoystickButtonPressedEventArgs> JoystickYchange;
+
+        protected virtual void OnJoystickZchange(JoystickButtonPressedEventArgs e)
+        {
+            EventHandler<JoystickButtonPressedEventArgs> handler = JoystickZchange;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+        }
+
+        public event EventHandler<JoystickButtonPressedEventArgs> JoystickZchange;
 
         protected virtual void OnJoystickRotationXchange(JoystickButtonPressedEventArgs e)
         {

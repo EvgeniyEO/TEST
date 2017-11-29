@@ -18,6 +18,10 @@ namespace TestMAP
         static public IPEndPoint ipEndPoint_MUD = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 50001);
         static public IPEndPoint ipEndPoint_NAV = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 50002);
 
+        static public IPEndPoint ipEndPoint_Pwm1   = new IPEndPoint(IPAddress.Parse("192.168.127.254"), 4001);
+        static public IPEndPoint ipEndPoint_Pwm2   = new IPEndPoint(IPAddress.Parse("192.168.127.254"), 4002);
+        static public IPEndPoint ipEndPoint_Pwm3   = new IPEndPoint(IPAddress.Parse("192.168.127.254"), 4003);
+        static public IPEndPoint ipEndPoint_Engine = new IPEndPoint(IPAddress.Parse("192.168.127.254"), 4004);
         public bool IsConnect() { return !stop; }
 
         public UDPClientClass(int port)

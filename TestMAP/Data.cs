@@ -23,24 +23,29 @@ namespace TestMAP
         public ReceiveBytesData() { }
         public ReceiveBytesData(byte[] receivebyte)
         {
-            var segmentHeader = new ArraySegment<byte>(receivebyte, 0, sizeHeader);
+            Int32 minSizeReceiveData = sizePacket_CA + sizeHeader;
 
-            switch (GetTypeData(segmentHeader))
+            if (receivebyte.Length >= minSizeReceiveData)
             {
-                case 0xCA:
-                    packet_CA = new Packet_CA();
-                    var segmentCA = new ArraySegment<byte>(receivebyte, sizeHeader, sizePacket_CA);
-                    GetPacket<Packet_CA>(segmentCA, ref packet_CA);
-                    break;
+                var segmentHeader = new ArraySegment<byte>(receivebyte, 0, sizeHeader);
 
-                case 0xAB:
-                    packet_AB = new Packet_AB();
-                    var segmentAB = new ArraySegment<byte>(receivebyte, sizeHeader, sizePacket_AB);
-                    GetPacket<Packet_AB>(segmentAB, ref packet_AB);
-                    break;
+                switch (GetTypeData(segmentHeader))
+                {
+                    case 0xCA:
+                        packet_CA = new Packet_CA();
+                        var segmentCA = new ArraySegment<byte>(receivebyte, sizeHeader, sizePacket_CA);
+                        GetPacket<Packet_CA>(segmentCA, ref packet_CA);
+                        break;
 
-                default:
-                    break;
+                    case 0xAB:
+                        packet_AB = new Packet_AB();
+                        var segmentAB = new ArraySegment<byte>(receivebyte, sizeHeader, sizePacket_AB);
+                        GetPacket<Packet_AB>(segmentAB, ref packet_AB);
+                        break;
+
+                    default:
+                        break;
+                }
             }
         }
 

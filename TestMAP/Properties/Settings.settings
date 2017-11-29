@@ -20,5 +20,17 @@
     <Setting Name="SettingAddressNav" Type="System.String" Scope="User">
       <Value Profile="(Default)">127.000.000.001:50002</Value>
     </Setting>
+    <Setting Name="SettingAddressPwm1" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.127.254:04001</Value>
+    </Setting>
+    <Setting Name="SettingAddressPwm2" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.127.254:04002</Value>
+    </Setting>
+    <Setting Name="SettingAddressPwm3" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.127.254:04003</Value>
+    </Setting>
+    <Setting Name="SettingAddressEngine" Type="System.String" Scope="User">
+      <Value Profile="(Default)">192.168.127.254:04004</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
