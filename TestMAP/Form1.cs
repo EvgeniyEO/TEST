@@ -51,6 +51,7 @@ namespace TestMAP
         List<JoystickDescriptor> ListJoyDescriptor = null;
         private TestMAP.UDPClientClass UDPClient = null;
         private TestMAP.ReceiveBytesData ReceiveData = new ReceiveBytesData();
+        private TestMAP.ReceiveBytesDataMoxa DataMoxa = new ReceiveBytesDataMoxa();
 
         //Переменная отвечающая за состояние нажатия 
         //левой клавиши мыши.
@@ -1004,10 +1005,16 @@ namespace TestMAP
 
         void UDPClient_ReceiveData(object sender, UDPClientClass.UdpClientEventArgs e)
         {
-            ReceiveData = new ReceiveBytesData(e.Data);
+            if (DataMoxa.StoreBytes(e.Data))
+            {
+                RefreshPicBox(pictureBox3);
+                RefreshPicBox(pictureBox4);
+            }
+
+            //ReceiveData = new ReceiveBytesData(e.Data);
             //SetTextBox(ReceiveData.packet_AB.rms_N3.ToString(), textBox1);
-            TMP = Encoding.UTF8.GetString(e.Data);//BitConverter.ToString(e.Data);
-            SetTextBox(TMP, textBox1);
+            //TMP = Encoding.UTF8.GetString(e.Data);//BitConverter.ToString(e.Data);
+            //SetTextBox(TMP, textBox1);
             //if (sender is UDPClientClass)
             //{
             //    UDPClientClass client = sender as UDPClientClass;
@@ -1018,6 +1025,7 @@ namespace TestMAP
         int JoyRotationX = 32767;
         int JoyRotationY = 32767;
         int JoyY = 32767;
+        
         private void pictureBox1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
             int joyX = JoyRotationX;
@@ -1734,10 +1742,16 @@ namespace TestMAP
 
         private void pictureBox3_Paint(object sender, System.Windows.Forms.PaintEventArgs ev)
         {
-            double Kur = 0.1;
-
             PictureBox curentPicBox = sender as PictureBox;
             Graphics graphics = ev.Graphics;
+            if (DataMoxa!=null)
+            {
+                DrawKur(ref curentPicBox, ref graphics, DataMoxa.pashr_data.Heading * (3.14 / 180));
+            }
+        }
+
+        void DrawKur(ref PictureBox curentPicBox, ref Graphics graphics, double Kur)
+        {
             graphics.Clear(Color.White);
 
             int Width = curentPicBox.Width;
@@ -1753,10 +1767,10 @@ namespace TestMAP
 
             pen.Color = Color.Black;
             pen.Width = 8;
-            
+
             int s, d;
             int e = 0;
-            
+
             double angle = Kur - 1.5707963267971534928089599443094;
             while (e < 80)
             {
@@ -1860,14 +1874,8 @@ namespace TestMAP
             graphics.DrawString("45", font, pen.Brush, Width / 2 + 55, Height / 2 - 70);
         }
 
-        private void pictureBox4_Paint(object sender, System.Windows.Forms.PaintEventArgs ev)
+        void DrawKurTanDif(ref PictureBox curentPicBox, ref Graphics graphics, int Tang, int Kur, double Diff)
         {
-            int Tang = 0; 
-            double Diff = 0.5;
-            int Kur = 10;
-
-            PictureBox curentPicBox = sender as PictureBox;
-            Graphics graphics = ev.Graphics;
             graphics.Clear(Color.White);
 
             int Width = curentPicBox.Width;
@@ -1919,7 +1927,7 @@ namespace TestMAP
             graphics.DrawString("10", font, pen.Brush, tmp2 + 47, tmp1 - 50);
             graphics.DrawString("10", font, pen.Brush, tmp2 - 65, tmp1 - 50);
             graphics.DrawString("20", font, pen.Brush, tmp2 + 47, tmp1 - 90);
-            graphics.DrawString("20", font, pen.Brush, tmp2 - 65, tmp1 - 90);     
+            graphics.DrawString("20", font, pen.Brush, tmp2 - 65, tmp1 - 90);
             graphics.DrawString("10", font, pen.Brush, tmp2 + 47, tmp1 + 30);
             graphics.DrawString("10", font, pen.Brush, tmp2 - 65, tmp1 + 30);
             graphics.DrawString("20", font, pen.Brush, tmp2 + 47, tmp1 + 70);
@@ -1943,9 +1951,10 @@ namespace TestMAP
                 graphics.DrawLine(pen, s, d, s + 1, d + 1);
                 e = e + 1;
             }
+            angle = (Diff / 3.1415926535) * 180;
 
             //graphics.DrawArc(pen, Width / 2 - 30, Height / 2 - 30, Width / 2 + 30, Height / 2 + 30, (int)((30) * Math.Cos(angle - 3.1415926535) + Width / 2), (int)((30) * Math.Sin(angle - 3.1415926535) + Height / 2));//, (30) * Math.Cos(angle) + Width / 2, (30) * Math.Sin(angle) + Height / 2);
-
+            graphics.DrawArc(pen, Width / 2 - 30, Height / 2 - 30, 60, 60, (int)(-angle), 180);
 
             pen.Width = 6;
             graphics.DrawLine(pen, Width / 2, Height / 2, Width / 2, Height / 2);
@@ -1954,7 +1963,7 @@ namespace TestMAP
 
             e = 0;
             pen.Color = Color.White;
-            pen.Width = 1;
+            pen.Width = 2;
 
             while (e < 10)
             {
@@ -2075,7 +2084,6 @@ namespace TestMAP
             if (Kur < 0)
             {
                 Kur = Kur + 360;
-
             }
 
             pen.Color = Color.Black;
@@ -2093,80 +2101,161 @@ namespace TestMAP
             graphics.DrawLine(pen, (int)(Width + (720 - Width / 2) + 720 - Kur * 4), 10, (int)(Width + (720 - Width / 2) + 910 - Kur * 4), 10);
 
             int f = 0;
+            while (f < 1444)
+            {
+                graphics.DrawLine(pen, (int)(-(720 - Width / 2) + 720 - Kur * 4 + f), 10, (int)(-(720 - Width / 2) + 720 - Kur * 4 + f), 22);
+                graphics.DrawLine(pen, (int)(-(720 - Width / 2) + 720 - Kur * 4 + f + 20), 10, (int)(-(720 - Width / 2) + 720 - Kur * 4 + f + 20), 16);
 
+                pen.Color = Color.White;
 
-            //while (f < 1444)
-            //{
-            //    bitmap->Canvas->MoveTo(-(720 - bitmap->Width / 2) + 720 - Kur * 4 + f, 10);
-            //    bitmap->Canvas->LineTo(-(720 - bitmap->Width / 2) + 720 - Kur * 4 + f, 22);
+                if (f == 0 || f == 1440)
+                {
+                    graphics.DrawString(Convert.ToString(0), font, pen.Brush, (int)(-(720 - Width / 2) + 720 - Kur * 4 + f - 7), 22);
+                }
+                else if (f < 40)
+                {
+                    graphics.DrawString(Convert.ToString(f / 4), font, pen.Brush, (int)(-(720 - Width / 2) + 720 - Kur * 4 + f - 2), 22);
+                }
+                else if (f < 400)
+                {
+                    graphics.DrawString(Convert.ToString(f / 4), font, pen.Brush, (int)(-(720 - Width / 2) + 720 - Kur * 4 + f - 12), 22);
+                }
+                else
+                {
+                    graphics.DrawString(Convert.ToString(f / 4), font, pen.Brush, (int)(-(720 - Width / 2) + 720 - Kur * 4 + f - 16), 22);
+                }
+                f = f + 40;
+            }
+            f = 0;
+            //Out of range
+            while (f < 130)
+            {
+                graphics.DrawLine(pen, (int)(-(720 - Width / 2) + 560 - Kur * 4 + f), 10, (int)(-(720 - Width / 2) + 560 - Kur * 4 + f), 22);
+                graphics.DrawLine(pen, (int)(-(720 - Width / 2) + 560 - Kur * 4 + f + 20), 10, (int)(-(720 - Width / 2) + 560 - Kur * 4 + f + 20), 16);
 
-            //    bitmap->Canvas->MoveTo(-(720 - bitmap->Width / 2) + 720 - Kur * 4 + f + 20, 10);
-            //    bitmap->Canvas->LineTo(-(720 - bitmap->Width / 2) + 720 - Kur * 4 + f + 20, 16);
+                graphics.DrawString(Convert.ToString(320 + f / 4), font, pen.Brush, (int)(-(720 - Width / 2) + 560 - Kur * 4 + f - 16), 22);
 
-            //    bitmap->Canvas->Brush->Color = clBlack;
-            //    bitmap->Canvas->Font->Color = clWhite;
-            //    if (f == 0 || f == 1440)
-            //    {
-            //        bitmap->Canvas->TextOutW(-(720 - bitmap->Width / 2) + 720 - Kur * 4 + f, 22, AnsiString(0));
-            //    }
-            //    if (f < 40)
-            //    {
-            //        bitmap->Canvas->TextOutW(-(720 - bitmap->Width / 2) + 720 - Kur * 4 + f - 2, 22, f / 4);
-            //    }
-            //    if (f < 400)
-            //    {
-            //        bitmap->Canvas->TextOutW(-(720 - bitmap->Width / 2) + 720 - Kur * 4 + f - 6, 22, f / 4);
-            //    }
-            //    else
-            //    {
-            //        bitmap->Canvas->TextOutW(-(720 - bitmap->Width / 2) + 720 - Kur * 4 + f - 9, 22, f / 4);
-            //    }
-            //    f = f + 40;
-            //}
-            //f = 0;
-            ////Out of range
-            //while (f < 130)
-            //{
-            //    bitmap->Canvas->MoveTo(-(720 - bitmap->Width / 2) + 560 - Kur * 4 + f, 10);
-            //    bitmap->Canvas->LineTo(-(720 - bitmap->Width / 2) + 560 - Kur * 4 + f, 22);
+                f = f + 40;
+            }
 
-            //    bitmap->Canvas->MoveTo(-(720 - bitmap->Width / 2) + 560 - Kur * 4 + f + 20, 10);
-            //    bitmap->Canvas->LineTo(-(720 - bitmap->Width / 2) + 560 - Kur * 4 + f + 20, 16);
+            f = 0;
+            while (f < 130)
+            {
+                graphics.DrawLine(pen, (int)(Width + (720 - Width / 2) + 760 - Kur * 4 + f), 10, (int)(Width + (720 - Width / 2) + 760 - Kur * 4 + f), 22);
+                graphics.DrawLine(pen, (int)(Width + (720 - Width / 2) + 760 - Kur * 4 + f + 20), 10, (int)(Width + (720 - Width / 2) + 760 - Kur * 4 + f + 20), 16);
 
-            //    bitmap->Canvas->TextOutW(-(720 - bitmap->Width / 2) + 560 - Kur * 4 + f - 9, 22, 320 + f / 4);
+                graphics.DrawString(Convert.ToString(10 + f / 4), font, pen.Brush, (int)(Width + (720 - Width / 2) + 760 - Kur * 4 + f - 12), 22);
 
-            //    f = f + 40;
-            //}
+                f = f + 40;
+            }
 
-            //f = 0;
-            //while (f < 130)
-            //{
-            //    bitmap->Canvas->MoveTo(bitmap->Width + (720 - bitmap->Width / 2) + 760 - Kur * 4 + f, 10);
-            //    bitmap->Canvas->LineTo(bitmap->Width + (720 - bitmap->Width / 2) + 760 - Kur * 4 + f, 22);
+            //Window of Course
+            pen.Color = Color.Black;
+            Rectangle rect = new Rectangle(Width / 2 - 26, 17, 52, 32);
+            graphics.FillRectangle(pen.Brush, rect);
+            pen.Color = Color.White;
+            graphics.DrawRectangle(pen, rect);
 
-            //    bitmap->Canvas->MoveTo(bitmap->Width + (720 - bitmap->Width / 2) + 760 - Kur * 4 + f + 20, 10);
-            //    bitmap->Canvas->LineTo(bitmap->Width + (720 - bitmap->Width / 2) + 760 - Kur * 4 + f + 20, 16);
-
-            //    bitmap->Canvas->TextOutW(bitmap->Width + (720 - bitmap->Width / 2) + 760 - Kur * 4 + f - 6, 22, 10 + f / 4);
-            //    //int g=bitmap->Width+(720-bitmap->Width/2)+760-Kur*4-2;
-            //    f = f + 40;
-            //}
-
-
-
-
-            ////Window of Course
-            //bitmap->Canvas->Rectangle(bitmap->Width / 2 - 18, 17, bitmap->Width / 2 + 19, 43);
-            //bitmap->Canvas->Font->Size = 15;
-            //bitmap->Canvas->TextOutW(bitmap->Width / 2 - 16, 18, Kur);
+            font = new Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            StringFormat stringFormat = new StringFormat();
+            stringFormat.Alignment = StringAlignment.Center;
+            stringFormat.LineAlignment = StringAlignment.Center;
+            graphics.DrawString(Convert.ToString(Kur), font, pen.Brush, rect, stringFormat);
 
             //--------------------------------------
+            //Frame
+
+            int k = 0;
+            while (k < 20)
+            {
+                pen.Color = Color.Black;
+                graphics.DrawLine(pen, k, 0, k, Height);
+                graphics.DrawLine(pen, Width - k, 0, Width - k, Height);
+                graphics.DrawLine(pen, 0, Height - k, Width, Height - k);
+
+                k = k + 1;
+            }
+            pen.Color = Color.Silver;
+            graphics.DrawLine(pen, 20, 50, 20, Height - 20);
+            graphics.DrawLine(pen, 20, 50, Width - 20, 50);
+            graphics.DrawLine(pen, Width - 20, Height - 20, Width - 20, 50);
+            graphics.DrawLine(pen, Width - 20, Height - 20, 20, Height - 20);
+
+            //-------------------------------------
+            //Round number
+
+            font = new Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+
+            Point point = new Point(Width / 2 + 107, Height / 2 + 15);
+            graphics.TranslateTransform(point.X, point.Y);
+            graphics.RotateTransform(15);
+            graphics.TranslateTransform(-point.X, -point.Y);
+            graphics.DrawString("15", font, pen.Brush, point);
+
+            graphics.ResetTransform();
+            point = new Point(Width / 2 + 100, Height / 2 + 43);
+            graphics.TranslateTransform(point.X, point.Y);
+            graphics.RotateTransform(30);
+            graphics.TranslateTransform(-point.X, -point.Y);
+            graphics.DrawString("30", font, pen.Brush, point);
+
+            graphics.ResetTransform();
+            point = new Point(Width / 2 + 88, Height / 2 + 68);
+            graphics.TranslateTransform(point.X, point.Y);
+            graphics.RotateTransform(45);
+            graphics.TranslateTransform(-point.X, -point.Y);
+            graphics.DrawString("45", font, pen.Brush, point);
+
+
+            graphics.ResetTransform();
+            point = new Point(Width / 2 - 136, Height / 2 + 25);
+            graphics.TranslateTransform(point.X, point.Y);
+            graphics.RotateTransform(-15);
+            graphics.TranslateTransform(-point.X, -point.Y);
+            graphics.DrawString("15", font, pen.Brush, point);
+
+            graphics.ResetTransform();
+            point = new Point(Width / 2 - 126, Height / 2 + 58);
+            graphics.TranslateTransform(point.X, point.Y);
+            graphics.RotateTransform(-30);
+            graphics.TranslateTransform(-point.X, -point.Y);
+            graphics.DrawString("30", font, pen.Brush, point);
+
+            graphics.ResetTransform();
+            point = new Point(Width / 2 - 105, Height / 2 + 88);
+            graphics.TranslateTransform(point.X, point.Y);
+            graphics.RotateTransform(-45);
+            graphics.TranslateTransform(-point.X, -point.Y);
+            graphics.DrawString("45", font, pen.Brush, point);
+            //-------------------------------------
         }
+
+        private void pictureBox4_Paint(object sender, System.Windows.Forms.PaintEventArgs ev)
+        {
+            int Tang = 0; 
+
+            PictureBox curentPicBox = sender as PictureBox;
+            Graphics graphics = ev.Graphics;
+
+            if (DataMoxa != null)
+            {
+                DrawKurTanDif(ref curentPicBox, ref graphics, Convert.ToInt32(DataMoxa.pashr_data.Pitch), Convert.ToInt32(DataMoxa.pashr_data.Heading), DataMoxa.pashr_data.Roll * (3.14 / 180));
+            }
+        }
+
+        double Diff = 0.0;
+        int Kur = 346;
+        int Tang = 0;
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            pictureBox3.Refresh();
-            pictureBox4.Refresh();
+            Kur = (Kur < 359) ? Kur+1 : 0;
+            Tang = (Tang < 359) ? Tang + 1 : 0;
+
+            Diff = (Diff > -3.14) ? Diff - 0.10 : 0;
+
+            //pictureBox3.Refresh();
+            //pictureBox4.Refresh();
         }
 
         private void bunifuTileButton1_Click(object sender, EventArgs e)

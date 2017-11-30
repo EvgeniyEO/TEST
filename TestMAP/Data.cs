@@ -8,6 +8,217 @@ using System.Threading.Tasks;
 
 namespace TestMAP
 {
+    class PASHR_DATA
+    {
+        public double Heading;
+        public double Roll;
+        public double Pitch;
+        public PASHR_DATA()
+        {
+            Heading = 0;
+            Roll = 0;
+            Pitch = 0;
+        }
+    }
+    class ReceiveBytesDataMoxa
+    {
+        public PASHR_DATA pashr_data = new PASHR_DATA();
+        static int MAX_BUF = 500;
+        byte[] Buffer = new byte[MAX_BUF];
+        UInt32 index = 0;
+        UInt32 index_chk = 0;
+        bool isDataReady = false;
+        enum Status { Header, Body, CheckSum, Data };
+        Status status = Status.Header;
+
+
+        public ReceiveBytesDataMoxa()
+        {
+
+        }
+
+        public bool StoreBytes(byte[] receivebyte)
+        {
+            bool result = false;
+
+            if ((receivebyte.Length + index) > MAX_BUF)
+            {
+                Array.Clear(Buffer, 0, MAX_BUF);
+                index = 0;
+            }
+            for (int i = 0; i < receivebyte.Length; i++)
+            {
+                switch (status)
+                {
+                    case Status.Header:
+                        switch (index)
+                        {
+                            case 0:
+                                index = (receivebyte[i] == 0x24) ? index + 1 : 0;
+                                break;
+                            case 1:
+                                index = (receivebyte[i] == 0x50) ? index + 1 : 0;
+                                break;
+                            case 2:
+                                index = (receivebyte[i] == 0x41) ? index + 1 : 0;
+                                break;
+                            case 3:
+                                index = (receivebyte[i] == 0x53) ? index + 1 : 0;
+                                break;
+                            case 4:
+                                index = (receivebyte[i] == 0x48) ? index + 1 : 0;
+                                break;
+                            case 5:
+                                if ( receivebyte[i] == 0x52 )
+                                {
+                                    status = Status.Body;
+                                    index++;
+                                }
+                                else
+                                {
+                                    index = 0;
+                                }
+                                break;
+                            default:
+                                index = 0;
+                                break;
+                        }
+                        if ( index > 1 )
+                        {
+                            Buffer[index - 2] = receivebyte[i];
+                            if (status == Status.Body)
+                                index--;
+                        }
+                        break;
+                    case Status.Body:
+                        switch (receivebyte[i])
+	                    {
+                            case 0x24:
+                                status = Status.Header;
+                                index = 0;
+                                break;
+                            case 0x2a:
+                                status = Status.CheckSum;
+                                index_chk = 0;
+                                break;
+		                    default:
+                                Buffer[index] = receivebyte[i];
+                                index++;
+                                if (index > MAX_BUF)
+                                {
+                                    index = 0;
+                                    status = Status.Header;
+                                }
+                                break;
+	                    }
+                        break;
+                    case Status.CheckSum:
+                        switch (index_chk)
+	                    {
+                            case 0:
+                                Buffer[index++] = receivebyte[i];
+                                index_chk++;
+                                break;
+                            case 1:
+                                Buffer[index++] = receivebyte[i];
+                                if (compCheckSum(Buffer, index-2, Buffer[index - 2], Buffer[index - 1]))
+                                {
+                                    if (parsData(Buffer, index - 2))
+                                    {
+                                        result = true;
+                                    }
+                                }
+                                status = Status.Header;
+                                index = 0;
+                                index_chk = 0;
+                                break;
+		                    default:
+                                index_chk = 0;
+                                status = Status.Header;
+                                index = 0;
+                                break;
+	                    }
+                        break;
+                    default:
+                        status = Status.Header;
+                        index = 0;
+                        break;
+                }
+            }
+            return result;
+        }
+
+        bool parsData(byte[] Data, UInt32 len)
+        {
+            bool result = false;
+            int count = 0;
+            int start = 0;
+            int end = 0;
+
+            for (int i = 0; i < len; i++)
+            {
+                if (count == 2 && Data[i] == 0x2c)
+                {
+                    var segmentHeader = new ArraySegment<byte>(Data, start, i - start);
+                    string tmp = Encoding.UTF8.GetString(segmentHeader.ToArray());
+                    pashr_data.Heading = Convert.ToDouble(tmp.Replace('.',','));
+                    
+                }
+                if (count == 4 && Data[i] == 0x2c)
+                {
+                    var segmentHeader = new ArraySegment<byte>(Data, start, i - start);
+                    string tmp = Encoding.UTF8.GetString(segmentHeader.ToArray());
+                    pashr_data.Roll = Convert.ToDouble(tmp.Replace('.', ','));
+                }
+                if (count == 5 && Data[i] == 0x2c)
+                {
+                    var segmentHeader = new ArraySegment<byte>(Data, start, i - start);
+                    string tmp = Encoding.UTF8.GetString(segmentHeader.ToArray());
+                    pashr_data.Pitch = Convert.ToDouble(tmp.Replace('.', ','));
+                    result = true;
+                    break;
+                }
+
+                if (Data[i] == 0x2c)
+                {
+                    count++;
+                    start = i+1;
+                }
+                
+            }
+
+            return result;
+        }
+
+        bool compCheckSum(byte[] receivebyte, UInt32 len, byte high, byte low)
+        {
+            byte Chk = 0, Read_Chk = 0;
+            UInt32 i = 0;
+
+            for (i = 0; i < len; i++)
+            {
+                Chk ^= receivebyte[i];
+            }
+
+            if ((high - '0') <= 9)
+                Read_Chk = (byte)((high - '0') << 4);
+            else
+                Read_Chk = (byte)((high - 'A' + 10) << 4);
+
+            if ((low - '0') <= 9)
+            {
+                Read_Chk |= (byte)(low - '0');
+            }
+            else
+            {
+                Read_Chk |= (byte)(low - 'A' + 10);
+            }
+
+            return (Read_Chk == Chk) ? true : false;
+        }
+    }
+
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     class ReceiveBytesData
     {
