@@ -222,9 +222,9 @@ namespace TestMAP
             //this.panelManual = new System.Windows.Forms.Panel();
             this.DirectInputCntrl = new DirectInputController();
 
+            this.DirectInputCntrl.JoystickZchange += JoystickZ_change;
+            this.DirectInputCntrl.JoystickXchange += JoystickX_change;
             this.DirectInputCntrl.JoystickYchange += JoystickY_change;
-            this.DirectInputCntrl.JoystickRotationXchange += JoystickRotationX_change;
-            this.DirectInputCntrl.JoystickRotationYchange += JoystickRotationY_change;
             this.DirectInputCntrl.Packet_CA_change += JoystickPacket_CA_change;
             //List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
             //DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
@@ -968,26 +968,37 @@ namespace TestMAP
                 PicBox.Refresh();
             }
         }
-        private void JoystickRotationX_change(object sender, JoystickButtonPressedEventArgs e)  
+        private void JoystickX_change(object sender, JoystickButtonPressedEventArgs e)  
         {
             //SetTextBox(e.Value.ToString(), ManualTextboxX);
             JoyRotationX = e.Value;
             //pictureBox1.Refresh();
             RefreshPicBox(pictureBox1);
         }
-        private void JoystickRotationY_change(object sender, JoystickButtonPressedEventArgs e)
-        {
-            //SetTextBox(e.Value.ToString(), ManualTextboxX);
-            JoyRotationY = e.Value;
-            //pictureBox1.Refresh();
-            RefreshPicBox(pictureBox1);
-        }
         private void JoystickY_change(object sender, JoystickButtonPressedEventArgs e)
         {
             //SetTextBox(e.Value.ToString(), ManualTextboxX);
-            JoyY = e.Value;
+            JoyRotationY = 65535 - e.Value;
             //pictureBox1.Refresh();
+            RefreshPicBox(pictureBox1);
+        }
+
+        Packet_CA packet = new Packet_CA();
+        private void JoystickZ_change(object sender, JoystickButtonPressedEventArgs e)
+        {
+            JoyY = e.Value;
             RefreshPicBox(pictureBox2);
+
+            Packet_CA packet_CA = new Packet_CA();
+
+            packet_CA.axis_X = (byte)(e.Value / 256);
+            packet.axis_X = (byte)(127 - (byte)((65535 - e.Value) / 2000));
+            
+
+            if ( UDPClient != null )
+            {
+                //UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Engine);
+            }
         }
         private void JoystickPacket_CA_change(object sender, JoystickPacket_CAEventArgs e)
         {
@@ -997,7 +1008,7 @@ namespace TestMAP
                 UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Pwm1);
                 UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Pwm2);
                 UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Pwm3);
-                UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Engine);
+                //UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_CA), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Engine);              
             }
         }
 
@@ -2249,10 +2260,7 @@ namespace TestMAP
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            Kur = (Kur < 359) ? Kur+1 : 0;
-            Tang = (Tang < 359) ? Tang + 1 : 0;
-
-            Diff = (Diff > -3.14) ? Diff - 0.10 : 0;
+            UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Engine);
 
             //pictureBox3.Refresh();
             //pictureBox4.Refresh();
@@ -2525,6 +2533,18 @@ namespace TestMAP
                     Convert.ToInt32(Settings.Default.SettingAddressEngine.Substring(16, 5))
                     );
             }  
+        }
+
+        private void bunifuCheckbox3_OnChange(object sender, EventArgs e)
+        {
+            Packet_CA packet_ON = new Packet_CA();
+
+            packet_ON.button1 = (byte)((bunifuCheckbox3.Checked) ? 1 : 0);
+
+            if (UDPClient != null)
+            {
+                UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_ON), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Camera);
+            }
         }
 
     }

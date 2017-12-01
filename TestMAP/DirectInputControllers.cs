@@ -154,25 +154,26 @@ namespace TestMAP
                     switch (state.Offset)
                     {
                         case JoystickOffset.RotationX:
-                            packet_CA.axis_X = (byte)(state.Value / 256);
+                            
                             args.Value = state.Value;
                             OnJoystickRotationXchange(args);
                             break;
-                        case JoystickOffset.RotationY:
-                            packet_CA.axis_Y = (byte)(state.Value / 256);
+                        case JoystickOffset.RotationY: 
                             args.Value = state.Value;
                             OnJoystickRotationYchange(args);
                             break;
                         case JoystickOffset.X:
+                            packet_CA.axis_X = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickXchange(args);
                             break;
                         case JoystickOffset.Y:
-                            packet_CA.axis_Z = (byte)(state.Value / 256);
+                            packet_CA.axis_Y = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickYchange(args);
                             break;
-                        case JoystickOffset.Z:
+                        case JoystickOffset.Sliders0:
+                            packet_CA.axis_Z = (byte)(state.Value / 256);
                             args.Value = state.Value;
                             OnJoystickZchange(args);
                             break;
