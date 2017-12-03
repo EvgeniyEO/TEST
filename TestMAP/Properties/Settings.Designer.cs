@@ -61,7 +61,7 @@ namespace TestMAP.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("50000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("04001")]
         public string SettingUdpPort {
             get {
                 return ((string)(this["SettingUdpPort"]));
@@ -97,7 +97,7 @@ namespace TestMAP.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.127.254:04001")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.100.100:04001")]
         public string SettingAddressPwm1 {
             get {
                 return ((string)(this["SettingAddressPwm1"]));
@@ -109,7 +109,7 @@ namespace TestMAP.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.127.254:04002")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.100.100:04002")]
         public string SettingAddressPwm2 {
             get {
                 return ((string)(this["SettingAddressPwm2"]));
@@ -121,7 +121,7 @@ namespace TestMAP.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.127.254:04003")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.100.100:04003")]
         public string SettingAddressPwm3 {
             get {
                 return ((string)(this["SettingAddressPwm3"]));
@@ -133,13 +133,25 @@ namespace TestMAP.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("192.168.127.254:04004")]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.100.100:04004")]
         public string SettingAddressEngine {
             get {
                 return ((string)(this["SettingAddressEngine"]));
             }
             set {
                 this["SettingAddressEngine"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.100.101:04005")]
+        public string SettingAddressCamera {
+            get {
+                return ((string)(this["SettingAddressCamera"]));
+            }
+            set {
+                this["SettingAddressCamera"] = value;
             }
         }
     }

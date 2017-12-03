@@ -107,11 +107,11 @@ namespace TestMAP
                             }
                             if ( bunifuDropdown1.selectedIndex >= 0 )
                             {
-                                bunifuThinButton21.ButtonText = "Подключиться";
+                                bunifuThinButton21.ButtonText = "Отключить";
                             }
                             else
                             {
-                                bunifuThinButton21.ButtonText = "Отключить";
+                                bunifuThinButton21.ButtonText = "Подключиться";
                             }                         
                         }
                     }
@@ -192,6 +192,15 @@ namespace TestMAP
                         Convert.ToInt32(Settings.Default.SettingAddressEngine.Substring(16, 5))
                         );
                 }
+
+                if (!string.IsNullOrEmpty(Settings.Default.SettingAddressCamera))
+                {
+                    maskedTextCamera.Text = Settings.Default.SettingAddressCamera;
+                    UDPClientClass.ipEndPoint_Camera = new System.Net.IPEndPoint(
+                        IPAddress.Parse(Settings.Default.SettingAddressCamera.Substring(0, 15)),
+                        Convert.ToInt32(Settings.Default.SettingAddressCamera.Substring(16, 5))
+                        );
+                }
                 //--------
                 
                 if (UDPClient!=null && Settings.Default.SettingUdpAutoConnect && !string.IsNullOrEmpty(Settings.Default.SettingUdpPort))
@@ -229,7 +238,7 @@ namespace TestMAP
             //List<JoystickDescriptor> ListJoy = DirectInputCntrl.DetectDevices();
             //DirectInputCntrl.StartCapture(ListJoy[0].DescriptorGuid);
 
-            this.UDPClient = new UDPClientClass(50000);
+            this.UDPClient = new UDPClientClass(4001);
             UDPClient.ReceiveData += UDPClient_ReceiveData;
             //UDPClient.StartReceiving();
 
@@ -883,13 +892,16 @@ namespace TestMAP
         }
         private void MenuButton_Click(object sender, EventArgs e)
         {
-            if (panelMenuGradient.Size.Width == 75)
+            int size = MenuButton.Width + 16;
+
+            if (panelMenuGradient.Size.Width == size)
             {
                 panelMenuGradient.Width = 280;
                 Form1_Resize(this, e);
                 FlatButtonMapWay.Text = "              Map and Waypoint";
                 FlatButtonControl.Text = "              Control";
                 FlatButtonSettings.Text = "              Settings";
+
                 // Для анимации боковой панели
                 /*
                 panelMenuGradient.Visible = false;
@@ -899,7 +911,7 @@ namespace TestMAP
             }
             else
             {
-                panelMenuGradient.Width = 75;
+                panelMenuGradient.Width = size;
                 Form1_Resize(this, e);
                 FlatButtonMapWay.Text = "";
                 FlatButtonControl.Text = "";
@@ -930,8 +942,9 @@ namespace TestMAP
         }
         private void FlatButtonControl_Click(object sender, EventArgs e)
         {
+            int size = MenuButton.Width + 16;
             FlatButtonManual.Visible = !FlatButtonManual.Visible;
-            if (FlatButtonManual.Visible && panelMenuGradient.Size.Width == 75)
+            if (FlatButtonManual.Visible && panelMenuGradient.Size.Width == size)
             {
                 MenuButton_Click(sender, e);
             }
@@ -2544,6 +2557,25 @@ namespace TestMAP
             if (UDPClient != null)
             {
                 UDPClient.Send(ReceiveData.getBytesToSendPacketCA(packet_ON), ReceiveData.getLenToSendPacketCA(), UDPClientClass.ipEndPoint_Camera);
+            }
+        }
+
+        private void maskedTextCamera_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.KeyChar = isCharToIP(sender, e);
+        }
+
+        private void TileButtonSaveCamera_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(maskedTextCamera.Text))
+            {
+                Settings.Default.SettingAddressCamera = maskedTextCamera.Lines[0];
+                Settings.Default.Save();
+
+                UDPClientClass.ipEndPoint_Camera = new System.Net.IPEndPoint(
+                    IPAddress.Parse(Settings.Default.SettingAddressCamera.Substring(0, 15)),
+                    Convert.ToInt32(Settings.Default.SettingAddressCamera.Substring(16, 5))
+                    );
             }
         }
 
